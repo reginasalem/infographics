@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Cost of Limited Internet Access on Opportunity</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --bg: #081018;
+      --panel: #0f1a24;
+      --text: #eaf2ff;
+      --muted: #9fb1c7;
+      --accent: #6dd3ff;
+      --accent-2: #ff7a59;
+      --danger: #ff5c8a;
+      --line: rgba(255,255,255,0.08);
+      --max: 1200px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(109,211,255,0.08), transparent 30%),
+        linear-gradient(180deg, #061019 0%, #081018 35%, #09131c 100%);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .article-layer {
+      position: relative;
+      z-index: 1;
+      transition: filter 200ms ease, transform 180ms ease;
+    }
+
+    .pixel-overlay,
+    .glitch-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 250ms ease;
+    }
+
+    .pixel-overlay {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 14px 14px;
+      mix-blend-mode: screen;
+    }
+
+    .glitch-overlay::before,
+    .glitch-overlay::after {
+      transform: translateX(10px);
+      opacity: 0.95;
+      animation-duration: 110ms;
+    }
+
+    @keyframes glitchShift {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-6px, 2px); }
+      50% { transform: translate(4px, -1px); }
+      75% { transform: translate(-2px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9;
+      opacity: 0.05;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.3) 0.5px, transparent 0.8px);
+      background-size: 8px 8px;
+    }
+
+    header.hero {
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding: 7rem 1.25rem 4rem;
+    }
+
+    .hero-inner,
+    section {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1, h2, h3 { line-height: 1.05; margin: 0 0 1rem; }
+    h1 { font-size: clamp(2.8rem, 7vw, 6.8rem); max-width: 11ch; }
+    h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); }
+    h3 { font-size: 1.2rem; }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      align-items: end;
+    }
+
+    .hero-copy p,
+    .lede,
+    .text-block p { color: var(--muted); font-size: 1.08rem; max-width: 65ch; }
+
+    .stats {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .stat-card,
+    .viz-card,
+    .quote-card,
+    .task-card {
+      background: rgba(15, 26, 36, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 1.2rem;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    .stat-label { color: var(--muted); font-size: 0.92rem; }
+    .stat-value { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; }
+
+    main section {
+      padding: 6rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .sticky-copy {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+    }
+
+    .scenario-grid,
+    .implications-grid,
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .task-card span {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-size: 0.88rem;
+      color: var(--accent);
+    }
+
+    .quote-card p { margin: 0 0 0.75rem; }
+    .quote-card strong { color: var(--accent); }
+
+    .bandwidth-section {
+      position: relative;
+    }
+
+    .bandwidth-stage {
+      position: relative;
+      min-height: 240vh;
+    }
+
+    .bandwidth-sticky {
+      position: sticky;
+      top: 0;
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      padding: 2rem 0;
+    }
+
+    .bandwidth-panel {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .meter {
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      margin: 1rem 0 0.75rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--danger), var(--accent));
+      transform-origin: left center;
+      transition: transform 120ms linear;
+    }
+
+    .bandwidth-readout {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .legend i {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 50%;
+      margin-right: 0.35rem;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 1rem;
+    }
+
+    .source-note {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.8rem;
+    }
+
+    svg { width: 100%; height: auto; display: block; }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .two-col,
+      .bandwidth-panel,
+      .scenario-grid,
+      .implications-grid,
+      .quote-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sticky-copy { position: static; }
+      .bandwidth-sticky { min-height: auto; }
+      header.hero { min-height: auto; padding-top: 5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pixel-overlay" id="pixelOverlay"></div>
+  <div class="glitch-overlay" id="glitchOverlay"></div>
+  <div class="noise"></div>
+
+  <div class="article-layer" id="articleLayer">
+    <header class="hero">
+      <div class="hero-inner hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Americas connectivity analysis</span>
+          <h1>The Cost of Limited Internet Access on Opportunity</h1>
+          <p class="lede">
+            A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, millions of people still rely on unstable mobile connections or slow broadband. This project explores how that gap shapes real opportunities.
+          </p>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">ITU estimate for 2024</div>
+            <div class="stat-value">~120M</div>
+            <div class="stat-label">people estimated to still lack reliable internet access across the Americas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">GSMA estimate</div>
+            <div class="stat-value">39%</div>
+            <div class="stat-label">of the global population lives within mobile broadband coverage but still does not use mobile internet</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <div class="two-col">
+          <div class="sticky-copy text-block">
+            <span class="eyebrow">The hidden assumption</span>
+            <h2>Modern services are designed for connectivity that many users do not have.</h2>
+            <p>
+              This project combines published connectivity statistics with a simplified storytelling dataset for task simulations. The regional access figures and headline metrics are grounded in current ITU and GSMA reporting, while the task-time simulation translates those conditions into an experience designers can feel.
+            </p>
+            <p>
+              Across the Americas, internet access is high in some countries but still uneven. North America exceeds 90% internet use, while several Latin American and Central American countries remain below 70%. Rural areas consistently show lower access rates than urban areas, meaning geography still shapes access to education, healthcare, and digital jobs.
+            </p>
+          </div>
+
+          <div class="viz-card">
+            <h3>Internet use across selected countries in the Americas</h3>
+            <div id="regionChart"></div>
+            <p class="source-note">Values approximated from ITU, World Bank, and national statistics reports for recent internet‑use estimates in countries across North America, Latin America, and the Caribbean.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <span class="eyebrow">Where the barriers show up</span>
+        <h2>Low connectivity is not one problem. It creates many forms of friction.</h2>
+        <div class="scenario-grid">
+          <div class="task-card">
+            <h3>Education</h3>
+            <p>Video lectures stall, LMS uploads fail, and timed quizzes become stressful when a student loses connection.</p>
+            <span>Bandwidth + stability dependency</span>
+          </div>
+          <div class="task-card">
+            <h3>Jobs</h3>
+            <p>Resume uploads, online assessments, and live interviews become higher-risk tasks for low-bandwidth users.</p>
+            <span>Deadlines + drop-off risk</span>
+          </div>
+          <div class="task-card">
+            <h3>Healthcare</h3>
+            <p>Patient portals, telehealth video, and imaging downloads become harder when data is expensive or unreliable.</p>
+            <span>Care quality + continuity</span>
+          </div>
+          <div class="task-card">
+            <h3>Government services</h3>
+            <p>Benefit forms, identity checks, and appointment systems can lock people out when pages time out or fail to load.</p>
+            <span>System trust + access</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="bandwidth-section" id="bandwidthSection">
+        <div class="bandwidth-stage">
+          <div class="bandwidth-sticky">
+            <div class="hero-inner bandwidth-panel">
+              <div class="text-block">
+                <span class="eyebrow">Scroll to simulate signal loss</span>
+                <h2>As the connection weakens, ordinary tasks become exhausting.</h2>
+                <p>
+                  This section intentionally glitches as you scroll. The visual effect turns slow internet into a feeling: unstable, fragmented, and frustrating. The chart updates from stronger connectivity to weaker connectivity as the article moves downward.
+                </p>
+                <div class="meter">
+                  <div class="meter-fill" id="meterFill"></div>
+                </div>
+                <div class="bandwidth-readout">
+                  <span>Signal strength</span>
+                  <strong id="speedLabel">15 Mbps</strong>
+                </div>
+                <p class="footer-note" id="taskCaption">
+                  Under stronger access, common digital tasks remain usable. Under weaker access, the same actions become slow or fail entirely.
+                </p>
+              </div>
+
+              <div class="viz-card">
+                <h3>Estimated completion time for common tasks</h3>
+                <div id="taskChart"></div>
+                <div class="legend">
+                  <span><i style="background: #6dd3ff"></i>Load / completion time</span>
+                  <span><i style="background: #ff7a59"></i>High-friction threshold</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="two-col">
+          <div class="viz-card">
+            <h3>Opportunity loss score by service type</h3>
+            <div id="impactChart"></div>
+            <p class="source-note">This score is a designed synthesis for storytelling, built from the project's argument that delays, drop-offs, and cost burden compound exclusion across essential services.</p>
+          </div>
+
+          <div class="text-block">
+            <span class="eyebrow">Consequences</span>
+            <h2>The design problem is not only access. It is compounding exclusion.</h2>
+            <p>
+              When a product assumes fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.
+            </p>
+            <div class="quote-grid">
+              <div class="quote-card">
+                <p>“I can open the form on my phone, but uploading the documents takes so long that I usually give up.”</p>
+                <strong>Composite scenario: government service user</strong>
+              </div>
+              <div class="quote-card">
+                <p>“When the video freezes in class, I miss the explanation and the rest of the lesson stops making sense.”</p>
+                <strong>Composite scenario: student</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <span class="eyebrow">Design implications</span>
+        <h2>If connectivity is unequal, then inclusive design must account for unequal conditions.</h2>
+        <div class="implications-grid">
+          <div class="task-card">
+            <h3>Design for interruption</h3>
+            <p>Save progress automatically, support retries, and avoid forcing users to restart long forms.</p>
+          </div>
+          <div class="task-card">
+            <h3>Reduce media weight</h3>
+            <p>Use lightweight interfaces, compressed assets, and low-bandwidth modes for essential flows.</p>
+          </div>
+          <div class="task-card">
+            <h3>Support mobile-first realities</h3>
+            <p>Many users are not desktop users on bad internet. They are mobile-only users on expensive data plans.</p>
+          </div>
+          <div class="task-card">
+            <h3>Measure exclusion</h3>
+            <p>Track failures, load time abandonment, and retry rates by bandwidth condition—not only average conversion.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const regionData = [
+      { region: "United States", percent: 93 },
+      { region: "Canada", percent: 94 },
+      { region: "Brazil", percent: 84 },
+      { region: "Mexico", percent: 78 },
+      { region: "Colombia", percent: 74 },
+      { region: "Peru", percent: 71 },
+      { region: "Dominican Republic", percent: 73 },
+      { region: "Guatemala", percent: 56 },
+      { region: "Honduras", percent: 53 }
+    ];
+
+    const taskStates = [
+      {
+        speed: "15 Mbps",
+        signal: 1,
+        caption: "At stronger speeds, all four tasks remain possible, though heavier services still take time.",
+        tasks: [
+          { task: "Apply for a job", seconds: 24 },
+          { task: "Attend online class", seconds: 16 },
+          { task: "Book telehealth", seconds: 28 },
+          { task: "Submit gov. form", seconds: 22 }
+        ]
+      },
+      {
+        speed: "6 Mbps",
+        signal: 0.7,
+        caption: "At moderate speeds, delays grow. Uploads and video-based services start to feel fragile.",
+        tasks: [
+          { task: "Apply for a job", seconds: 49 },
+          { task: "Attend online class", seconds: 38 },
+          { task: "Book telehealth", seconds: 61 },
+          { task: "Submit gov. form", seconds: 45 }
+        ]
+      },
+      {
+        speed: "2 Mbps",
+        signal: 0.38,
+        caption: "At weak speeds, wait times become disruptive. Multi-step tasks become harder to finish.",
+        tasks: [
+          { task: "Apply for a job", seconds: 96 },
+          { task: "Attend online class", seconds: 112 },
+          { task: "Book telehealth", seconds: 135 },
+          { task: "Submit gov. form", seconds: 89 }
+        ]
+      },
+      {
+        speed: "0.6 Mbps",
+        signal: 0.12,
+        caption: "At very weak speeds, some tasks may technically load, but the user experience becomes punishing and failure-prone.",
+        tasks: [
+          { task: "Apply for a job", seconds: 201 },
+          { task: "Attend online class", seconds: 260 },
+          { task: "Book telehealth", seconds: 310 },
+          { task: "Submit gov. form", seconds: 184 }
+        ]
+      }
+    ];
+
+    const impactData = [
+      { service: "Healthcare", score: 86 },
+      { service: "Education", score: 81 },
+      { service: "Jobs", score: 74 },
+      { service: "Government", score: 69 }
+    ];
+
+    function createRegionChart() {
+      const container = document.getElementById("regionChart");
+      const width = container.clientWidth || 700;
+      const height = 420;
+      const margin = { top: 20, right: 20, bottom: 60, left: 85 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const x = d3.scaleBand()
+        .domain(regionData.map(d => d.region))
+        .range([margin.left, width - margin.right])
+        .padding(0.2);
+
+      const y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([height - margin.bottom, margin.top]);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+        .call(g => g.selectAll("text")
+          .attr("fill", "#9fb1c7")
+          .style("font-size", "12px"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.selectAll(".grid-line")
+        .data(y.ticks(5))
+        .enter()
+        .append("line")
+        .attr("x1", margin.left)
+        .attr("x2", width - margin.right)
+        .attr("y1", d => y(d))
+        .attr("y2", d => y(d))
+        .attr("stroke", "rgba(255,255,255,0.07)")
+        .attr("stroke-dasharray", "4 4");
+
+      svg.selectAll(".bar")
+        .data(regionData)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.region))
+        .attr("y", d => y(d.percent))
+        .attr("width", x.bandwidth())
+        .attr("height", d => y(0) - y(d.percent))
+        .attr("rx", 8)
+        .attr("fill", "#6dd3ff");
+
+      svg.selectAll(".label")
+        .data(regionData)
+        .enter()
+        .append("text")
+        .attr("x", d => x(d.region) + x.bandwidth() / 2)
+        .attr("y", d => y(d.percent) - 10)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#eaf2ff")
+        .style("font-size", "12px")
+        .text(d => `${d.percent}%`);
+    }
+
+    function createImpactChart() {
+      const container = document.getElementById("impactChart");
+      const width = container.clientWidth || 700;
+      const height = 330;
+      const margin = { top: 10, right: 20, bottom: 45, left: 120 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const x = d3.scaleLinear()
+        .domain([0, 100])
+        .range([margin.left, width - margin.right]);
+
+      const y = d3.scaleBand()
+        .domain(impactData.map(d => d.service))
+        .range([margin.top, height - margin.bottom])
+        .padding(0.25);
+
+      svg.selectAll(".row-bg")
+        .data(impactData)
+        .enter()
+        .append("rect")
+        .attr("x", margin.left)
+        .attr("y", d => y(d.service))
+        .attr("width", width - margin.left - margin.right)
+        .attr("height", y.bandwidth())
+        .attr("rx", 10)
+        .attr("fill", "rgba(255,255,255,0.05)");
+
+      svg.selectAll(".row-bar")
+        .data(impactData)
+        .enter()
+        .append("rect")
+        .attr("x", margin.left)
+        .attr("y", d => y(d.service))
+        .attr("width", d => x(d.score) - margin.left)
+        .attr("height", y.bandwidth())
+        .attr("rx", 10)
+        .attr("fill", "#ff7a59");
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).ticks(5))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y))
+        .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
+        .call(g => g.selectAll("path, line").remove());
+
+      svg.selectAll(".value")
+        .data(impactData)
+        .enter()
+        .append("text")
+        .attr("x", d => x(d.score) + 8)
+        .attr("y", d => y(d.service) + y.bandwidth() / 2 + 4)
+        .attr("fill", "#eaf2ff")
+        .style("font-size", "12px")
+        .text(d => d.score);
+    }
+
+    let taskSvg, taskX, taskY, taskHeight, taskWidth, taskMargin;
+
+    function createTaskChart() {
+      const container = document.getElementById("taskChart");
+      taskWidth = container.clientWidth || 700;
+      taskHeight = 360;
+      taskMargin = { top: 20, right: 30, bottom: 50, left: 135 };
+
+      taskSvg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${taskWidth} ${taskHeight}`);
+
+      taskX = d3.scaleLinear()
+        .domain([0, 330])
+        .range([taskMargin.left, taskWidth - taskMargin.right]);
+
+      taskY = d3.scaleBand()
+        .domain(taskStates[0].tasks.map(d => d.task))
+        .range([taskMargin.top, taskHeight - taskMargin.bottom])
+        .padding(0.28);
+
+      taskSvg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${taskHeight - taskMargin.bottom})`)
+        .call(d3.axisBottom(taskX).ticks(5).tickFormat(d => `${d}s`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      taskSvg.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${taskMargin.left},0)`)
+        .call(d3.axisLeft(taskY))
+        .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
+        .call(g => g.selectAll("path, line").remove());
+
+      taskSvg.append("line")
+        .attr("class", "threshold")
+        .attr("x1", taskX(120))
+        .attr("x2", taskX(120))
+        .attr("y1", taskMargin.top)
+        .attr("y2", taskHeight - taskMargin.bottom)
+        .attr("stroke", "#ff7a59")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "6 6");
+
+      taskSvg.append("text")
+        .attr("x", taskX(120) + 8)
+        .attr("y", taskMargin.top - 4)
+        .attr("fill", "#ff7a59")
+        .style("font-size", "12px")
+        .text("high-friction threshold");
+
+      taskSvg.selectAll(".task-bg")
+        .data(taskStates[0].tasks)
+        .enter()
+        .append("rect")
+        .attr("class", "task-bg")
+        .attr("x", taskMargin.left)
+        .attr("y", d => taskY(d.task))
+        .attr("width", taskWidth - taskMargin.left - taskMargin.right)
+        .attr("height", taskY.bandwidth())
+        .attr("rx", 10)
+        .attr("fill", "rgba(255,255,255,0.05)");
+
+      taskSvg.append("g").attr("class", "bars");
+      taskSvg.append("g").attr("class", "labels");
+
+      updateTaskChart(0);
+    }
+
+    function updateTaskChart(index) {
+      const state = taskStates[index];
+      const bars = taskSvg.select(".bars").selectAll("rect").data(state.tasks, d => d.task);
+      const labels = taskSvg.select(".labels").selectAll("text").data(state.tasks, d => d.task);
+
+      bars.join("rect")
+        .attr("x", taskMargin.left)
+        .attr("y", d => taskY(d.task))
+        .attr("height", taskY.bandwidth())
+        .attr("rx", 10)
+        .transition()
+        .duration(180)
+        .attr("width", d => taskX(d.seconds) - taskMargin.left)
+        .attr("fill", d => d.seconds > 120 ? "#ff7a59" : "#6dd3ff");
+
+      labels.join("text")
+        .attr("y", d => taskY(d.task) + taskY.bandwidth() / 2 + 4)
+        .transition()
+        .duration(180)
+        .attr("x", d => taskX(d.seconds) + 8)
+        .attr("fill", "#eaf2ff")
+        .style("font-size", "12px")
+        .text(d => `${d.seconds}s`);
+
+      document.getElementById("speedLabel").textContent = state.speed;
+      document.getElementById("taskCaption").textContent = state.caption;
+      document.getElementById("meterFill").style.transform = `scaleX(${state.signal})`;
+    }
+
+    function setupScrollEffects() {
+      const section = document.getElementById("bandwidthSection");
+      const pixelOverlay = document.getElementById("pixelOverlay");
+      const glitchOverlay = document.getElementById("glitchOverlay");
+      const articleLayer = document.getElementById("articleLayer");
+
+      const onScroll = () => {
+        const rect = section.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        const progress = Math.min(1, Math.max(0, -rect.top / Math.max(total, 1)));
+
+        const stateIndex = Math.min(taskStates.length - 1, Math.floor(progress * taskStates.length));
+        updateTaskChart(stateIndex);
+
+        const glitchAmount = Math.max(0, Math.min(1, (progress - 0.05) / 0.95));
+        pixelOverlay.style.opacity = (glitchAmount * 1).toFixed(2);
+        glitchOverlay.style.opacity = (glitchAmount * 0.95).toFixed(2);
+
+        const block = 1 + glitchAmount * 10;
+        articleLayer.style.filter = `blur(${glitchAmount * 1.8}px) contrast(${1 + glitchAmount * 0.18}) saturate(${1 - glitchAmount * 0.22})`;
+        articleLayer.style.transform = `translate(${Math.sin(progress * 120) * glitchAmount * 5}px, ${Math.cos(progress * 50) * glitchAmount * 1.5}px)`;
+        pixelOverlay.style.backgroundSize = `${block}px ${block}px`;
+      };
+
+      window.addEventListener("scroll", onScroll);
+      window.addEventListener("resize", onScroll);
+      onScroll();
+    }
+
+    createRegionChart();
+    createImpactChart();
+    createTaskChart();
+    setupScrollEffects();
+  </script>
+</body>
+</html>
