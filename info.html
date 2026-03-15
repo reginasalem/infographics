@@ -44,7 +44,7 @@
       pointer-events: none;
       z-index: 10;
       opacity: 0;
-      transition: opacity 250ms ease;
+      transition: opacity 120ms ease;
     }
 
     .pixel-overlay {
@@ -155,6 +155,33 @@
       position: sticky;
       top: 2rem;
       align-self: start;
+    }
+
+    .scenario-grid,
+    .implications-grid,
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .chart-legend-inline {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 0.8rem;
+    }
+
+    .chart-legend-inline .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.45rem;
+      vertical-align: middle;
     }
 
     .scenario-grid,
@@ -307,20 +334,63 @@
       <section>
         <div class="two-col">
           <div class="sticky-copy text-block">
-            <span class="eyebrow">The hidden assumption</span>
-            <h2>Modern services are designed for connectivity that many users do not have.</h2>
+            <span class="eyebrow">Access across the Americas</span>
+            <h2>Connectivity is not evenly distributed across the hemisphere.</h2>
             <p>
-              This project combines published connectivity statistics with a simplified storytelling dataset for task simulations. The regional access figures and headline metrics are grounded in current ITU and GSMA reporting, while the task-time simulation translates those conditions into an experience designers can feel.
+              Even within the Americas, internet access varies dramatically. Canada and the United States are above 90% internet use, while several countries in Central America remain far lower. That means the same digital service can feel routine in one place and exclusionary in another.
             </p>
             <p>
-              Across the Americas, internet access is high in some countries but still uneven. North America exceeds 90% internet use, while several Latin American and Central American countries remain below 70%. Rural areas consistently show lower access rates than urban areas, meaning geography still shapes access to education, healthcare, and digital jobs.
+              This matters because digital participation is no longer optional. School systems, public services, jobs, and health care increasingly assume people can connect quickly, consistently, and affordably.
             </p>
           </div>
 
           <div class="viz-card">
             <h3>Internet use across selected countries in the Americas</h3>
             <div id="regionChart"></div>
-            <p class="source-note">Values approximated from ITU, World Bank, and national statistics reports for recent internet‑use estimates in countries across North America, Latin America, and the Caribbean.</p>
+            <p class="source-note">Recent country estimates are based on World Bank internet-use series and ITU definitions of internet users. Values are simplified for storytelling and rounded for design clarity.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="two-col">
+          <div class="viz-card">
+            <h3>Urban vs. rural internet access</h3>
+            <div id="ruralUrbanChart"></div>
+            <div class="chart-legend-inline">
+              <span><i class="dot" style="background:#6dd3ff"></i>Urban</span>
+              <span><i class="dot" style="background:#ff7a59"></i>Rural</span>
+            </div>
+            <p class="source-note">This chart reflects the persistent urban-rural access gap reported across the region by ITU, GSMA, and national statistical sources.</p>
+          </div>
+
+          <div class="text-block">
+            <span class="eyebrow">Geography matters</span>
+            <h2>Where you live still shapes what the internet can do for you.</h2>
+            <p>
+              The urban-rural divide is one of the clearest reasons opportunity becomes unequal. In dense cities, a student may stream lectures, upload files, and schedule appointments easily. In rural communities, the same actions may depend on weaker infrastructure, more expensive mobile data, or intermittent service.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="two-col">
+          <div class="text-block">
+            <span class="eyebrow">Affordability</span>
+            <h2>Coverage alone does not equal access when the data itself is expensive.</h2>
+            <p>
+              A person may technically have mobile internet coverage and still be excluded if data costs are too high relative to income. This is especially important for tasks that require video, document uploads, or repeated retries after a failed session.
+            </p>
+          </div>
+
+          <div class="viz-card">
+            <h3>Estimated cost of 1GB mobile data (USD)</h3>
+            <div id="dataCostChart"></div>
+            <div class="chart-legend-inline">
+              <span><i class="dot" style="background:#ff7a59"></i>Cost of 1GB of mobile data in USD</span>
+            </div>
+            <p class="source-note">This affordability comparison is a simplified regional view inspired by A4AI pricing benchmarks and country price-comparison reporting.</p>
           </div>
         </div>
       </section>
@@ -352,6 +422,30 @@
         </div>
       </section>
 
+      <section>
+        <div class="two-col">
+          <div class="viz-card">
+            <h3>Estimated task abandonment under weaker connectivity</h3>
+            <div id="dropoffChart"></div>
+            <div class="chart-legend-inline">
+              <span><i class="dot" style="background:#6dd3ff"></i>Education</span>
+              <span><i class="dot" style="background:#8bc6ff"></i>Jobs</span>
+              <span><i class="dot" style="background:#ff7a59"></i>Healthcare</span>
+              <span><i class="dot" style="background:#ffd166"></i>Government</span>
+            </div>
+            <p class="source-note">This chart is an interpretive design model: not a direct published dataset, but a visual translation of how weaker speeds increase failure and abandonment risk across service types.</p>
+          </div>
+
+          <div class="text-block">
+            <span class="eyebrow">Compounding friction</span>
+            <h2>Slow connectivity creates drop-off long before a task is technically impossible.</h2>
+            <p>
+              People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes “abandonment” an important part of the opportunity story: systems can exclude users even when they still technically load.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="bandwidth-section" id="bandwidthSection">
         <div class="bandwidth-stage">
           <div class="bandwidth-sticky">
@@ -378,8 +472,8 @@
                 <h3>Estimated completion time for common tasks</h3>
                 <div id="taskChart"></div>
                 <div class="legend">
-                  <span><i style="background: #6dd3ff"></i>Load / completion time</span>
-                  <span><i style="background: #ff7a59"></i>High-friction threshold</span>
+                  <span><i style="background: #6dd3ff"></i>Task stays under high-friction threshold</span>
+                  <span><i style="background: #ff7a59"></i>Task exceeds high-friction threshold</span>
                 </div>
               </div>
             </div>
@@ -442,15 +536,43 @@
 
   <script>
     const regionData = [
-      { region: "United States", percent: 93 },
       { region: "Canada", percent: 94 },
+      { region: "United States", percent: 93 },
       { region: "Brazil", percent: 84 },
-      { region: "Mexico", percent: 78 },
+      { region: "Mexico", percent: 81 },
       { region: "Colombia", percent: 74 },
       { region: "Peru", percent: 71 },
-      { region: "Dominican Republic", percent: 73 },
-      { region: "Guatemala", percent: 56 },
+      { region: "Dominican Republic", percent: 75 },
+      { region: "Guatemala", percent: 58 },
       { region: "Honduras", percent: 53 }
+    ];
+
+    const ruralUrbanData = [
+      { country: "United States", urban: 92, rural: 79 },
+      { country: "Mexico", urban: 83, rural: 62 },
+      { country: "Brazil", urban: 88, rural: 72 },
+      { country: "Colombia", urban: 79, rural: 58 },
+      { country: "Peru", urban: 78, rural: 49 },
+      { country: "Guatemala", urban: 64, rural: 34 }
+    ];
+
+    const dataCostData = [
+      { country: "Canada", cost: 3.7 },
+      { country: "United States", cost: 3.1 },
+      { country: "Mexico", cost: 2.2 },
+      { country: "Brazil", cost: 1.5 },
+      { country: "Colombia", cost: 1.8 },
+      { country: "Peru", cost: 1.9 },
+      { country: "Dominican Republic", cost: 2.4 },
+      { country: "Guatemala", cost: 2.7 },
+      { country: "Honduras", cost: 3.0 }
+    ];
+
+    const dropoffData = [
+      { speed: "15 Mbps", education: 6, jobs: 8, healthcare: 10, government: 7 },
+      { speed: "6 Mbps", education: 14, jobs: 19, healthcare: 23, government: 17 },
+      { speed: "2 Mbps", education: 31, jobs: 37, healthcare: 42, government: 35 },
+      { speed: "0.6 Mbps", education: 57, jobs: 63, healthcare: 71, government: 59 }
     ];
 
     const taskStates = [
@@ -572,6 +694,242 @@
         .attr("fill", "#eaf2ff")
         .style("font-size", "12px")
         .text(d => `${d.percent}%`);
+
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 12)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Selected countries in the Americas");
+
+      svg.append("text")
+        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Internet users (% of population)");
+    }
+
+    function createRuralUrbanChart() {
+      const container = document.getElementById("ruralUrbanChart");
+      const width = container.clientWidth || 700;
+      const height = 380;
+      const margin = { top: 20, right: 20, bottom: 55, left: 55 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const x0 = d3.scaleBand()
+        .domain(ruralUrbanData.map(d => d.country))
+        .range([margin.left, width - margin.right])
+        .padding(0.24);
+
+      const x1 = d3.scaleBand()
+        .domain(["urban", "rural"])
+        .range([0, x0.bandwidth()])
+        .padding(0.16);
+
+      const y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([height - margin.bottom, margin.top]);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x0))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7").style("font-size", "12px"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      const groups = svg.selectAll(".country-group")
+        .data(ruralUrbanData)
+        .enter()
+        .append("g")
+        .attr("transform", d => `translate(${x0(d.country)},0)`);
+
+      groups.append("rect")
+        .attr("x", d => x1("urban"))
+        .attr("y", d => y(d.urban))
+        .attr("width", x1.bandwidth())
+        .attr("height", d => y(0) - y(d.urban))
+        .attr("rx", 8)
+        .attr("fill", "#6dd3ff");
+
+      groups.append("rect")
+        .attr("x", d => x1("rural"))
+        .attr("y", d => y(d.rural))
+        .attr("width", x1.bandwidth())
+        .attr("height", d => y(0) - y(d.rural))
+        .attr("rx", 8)
+        .attr("fill", "#ff7a59");
+
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 12)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Selected countries in the Americas");
+
+      svg.append("text")
+        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Population with internet access (%)");
+    }
+
+    function createDataCostChart() {
+      const container = document.getElementById("dataCostChart");
+      const width = container.clientWidth || 700;
+      const height = 380;
+      const margin = { top: 20, right: 20, bottom: 55, left: 90 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const x = d3.scaleBand()
+        .domain(dataCostData.map(d => d.country))
+        .range([margin.left, width - margin.right])
+        .padding(0.22);
+
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(dataCostData, d => d.cost) + 0.8])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+        .call(g => g.selectAll("text")
+          .attr("transform", "rotate(-28)")
+          .style("text-anchor", "end")
+          .attr("fill", "#9fb1c7")
+          .style("font-size", "12px"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `$${d}`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.selectAll(".cost-bar")
+        .data(dataCostData)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.country))
+        .attr("y", d => y(d.cost))
+        .attr("width", x.bandwidth())
+        .attr("height", d => y(0) - y(d.cost))
+        .attr("rx", 8)
+        .attr("fill", "#ff7a59");
+
+      svg.selectAll(".cost-label")
+        .data(dataCostData)
+        .enter()
+        .append("text")
+        .attr("x", d => x(d.country) + x.bandwidth() / 2)
+        .attr("y", d => y(d.cost) - 8)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#eaf2ff")
+        .style("font-size", "12px")
+        .text(d => `$${d.cost.toFixed(1)}`);
+
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 12)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Selected countries in the Americas");
+
+      svg.append("text")
+        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Estimated price of 1GB mobile data (USD)");
+    }
+
+    function createDropoffChart() {
+      const container = document.getElementById("dropoffChart");
+      const width = container.clientWidth || 700;
+      const height = 360;
+      const margin = { top: 20, right: 90, bottom: 50, left: 55 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const keys = ["education", "jobs", "healthcare", "government"];
+      const x = d3.scalePoint()
+        .domain(dropoffData.map(d => d.speed))
+        .range([margin.left, width - margin.right]);
+
+      const y = d3.scaleLinear()
+        .domain([0, 80])
+        .range([height - margin.bottom, margin.top]);
+
+      const color = d3.scaleOrdinal()
+        .domain(keys)
+        .range(["#6dd3ff", "#8bc6ff", "#ff7a59", "#ffd166"]);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      keys.forEach(key => {
+        const line = d3.line()
+          .x(d => x(d.speed))
+          .y(d => y(d[key]));
+
+        svg.append("path")
+          .datum(dropoffData)
+          .attr("fill", "none")
+          .attr("stroke", color(key))
+          .attr("stroke-width", 3)
+          .attr("d", line);
+
+        svg.selectAll(`.dot-${key}`)
+          .data(dropoffData)
+          .enter()
+          .append("circle")
+          .attr("cx", d => x(d.speed))
+          .attr("cy", d => y(d[key]))
+          .attr("r", 4)
+          .attr("fill", color(key));
+      });
+
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 12)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Connection speed");
+
+      svg.append("text")
+        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("Estimated abandonment rate (%)");
     }
 
     function createImpactChart() {
@@ -742,31 +1100,54 @@
       const pixelOverlay = document.getElementById("pixelOverlay");
       const glitchOverlay = document.getElementById("glitchOverlay");
       const articleLayer = document.getElementById("articleLayer");
+      let scrollTimeout;
+
+      const clearEffects = () => {
+        pixelOverlay.style.opacity = 0;
+        glitchOverlay.style.opacity = 0;
+        articleLayer.style.filter = "none";
+        articleLayer.style.transform = "none";
+      };
 
       const onScroll = () => {
         const rect = section.getBoundingClientRect();
+        const inSection = rect.top < window.innerHeight && rect.bottom > 0;
+
+        if (!inSection) {
+          clearEffects();
+          return;
+        }
+
         const total = rect.height - window.innerHeight;
         const progress = Math.min(1, Math.max(0, -rect.top / Math.max(total, 1)));
-
-        const stateIndex = Math.min(taskStates.length - 1, Math.floor(progress * taskStates.length));
-        updateTaskChart(stateIndex);
+        const clampedIndex = Math.min(taskStates.length - 1, Math.floor(progress * taskStates.length));
+        updateTaskChart(clampedIndex);
 
         const glitchAmount = Math.max(0, Math.min(1, (progress - 0.05) / 0.95));
         pixelOverlay.style.opacity = (glitchAmount * 1).toFixed(2);
         glitchOverlay.style.opacity = (glitchAmount * 0.95).toFixed(2);
 
         const block = 1 + glitchAmount * 10;
+        pixelOverlay.style.backgroundSize = `${block}px ${block}px`;
         articleLayer.style.filter = `blur(${glitchAmount * 1.8}px) contrast(${1 + glitchAmount * 0.18}) saturate(${1 - glitchAmount * 0.22})`;
         articleLayer.style.transform = `translate(${Math.sin(progress * 120) * glitchAmount * 5}px, ${Math.cos(progress * 50) * glitchAmount * 1.5}px)`;
-        pixelOverlay.style.backgroundSize = `${block}px ${block}px`;
+
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          clearEffects();
+        }, 90);
       };
 
-      window.addEventListener("scroll", onScroll);
+      window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", onScroll);
+      clearEffects();
       onScroll();
     }
 
     createRegionChart();
+    createRuralUrbanChart();
+    createDataCostChart();
+    createDropoffChart();
     createImpactChart();
     createTaskChart();
     setupScrollEffects();
