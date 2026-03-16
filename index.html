@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Cost of Limited Internet Access on Opportunity</title>
+  <title>When Poverty Limits Connection, Opportunity Shrinks</title>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
@@ -13,6 +13,7 @@
       --muted: #9fb1c7;
       --accent: #6dd3ff;
       --accent-2: #ff7a59;
+      --accent-3: #ffd166;
       --danger: #ff5c8a;
       --line: rgba(255,255,255,0.08);
       --max: 1200px;
@@ -57,9 +58,102 @@
 
     .glitch-overlay::before,
     .glitch-overlay::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px,
+          transparent 18px,
+          rgba(255, 92, 138, 0.18) 19px,
+          rgba(109, 211, 255, 0.18) 21px,
+          transparent 23px,
+          transparent 40px
+        );
+      animation: glitchShift 140ms steps(2, end) infinite;
+    }
+
+    .glitch-overlay::after {
       transform: translateX(10px);
       opacity: 0.95;
       animation-duration: 110ms;
+    }
+
+    .global-glitch {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 14;
+      opacity: 0;
+      transition: opacity 60ms linear;
+      overflow: hidden;
+    }
+
+    .global-glitch::before,
+    .global-glitch::after,
+    .global-glitch .glitch-bars,
+    .global-glitch .glitch-noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    .global-glitch::before {
+      content: "";
+      background:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px,
+          transparent 20px,
+          rgba(255, 80, 120, 0.14) 21px,
+          rgba(0, 229, 255, 0.14) 23px,
+          transparent 25px,
+          transparent 44px
+        );
+      mix-blend-mode: screen;
+    }
+
+    .global-glitch::after {
+      content: "";
+      background:
+        linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 0, 92, 0.08) 18%,
+          transparent 36%,
+          rgba(0, 229, 255, 0.08) 64%,
+          transparent 82%
+        );
+      filter: blur(0.8px);
+      mix-blend-mode: screen;
+    }
+
+    .global-glitch .glitch-bars {
+      background:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px,
+          transparent 52px,
+          rgba(255,255,255,0.08) 53px,
+          rgba(255,255,255,0.08) 56px,
+          transparent 57px,
+          transparent 110px
+        );
+      mix-blend-mode: screen;
+    }
+
+    .global-glitch .glitch-noise {
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.18) 0.6px, transparent 0.9px);
+      background-size: 8px 8px;
+      mix-blend-mode: screen;
+    }
+
+    .global-glitch.is-active::before,
+    .global-glitch.is-active::after,
+    .global-glitch.is-active .glitch-bars,
+    .global-glitch.is-active .glitch-noise {
+      opacity: 1;
     }
 
     @keyframes glitchShift {
@@ -184,15 +278,6 @@
       vertical-align: middle;
     }
 
-    .scenario-grid,
-    .implications-grid,
-    .quote-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
     .task-card span {
       display: inline-block;
       margin-top: 0.7rem;
@@ -210,6 +295,12 @@
     .bandwidth-stage {
       position: relative;
       min-height: 240vh;
+    }
+
+    .x-axis-label,
+    .y-axis-label {
+      fill: #9fb1c7;
+      font-size: 12px;
     }
 
     .bandwidth-sticky {
@@ -302,29 +393,30 @@
 <body>
   <div class="pixel-overlay" id="pixelOverlay"></div>
   <div class="glitch-overlay" id="glitchOverlay"></div>
+  <div class="global-glitch" id="globalGlitch"><div class="glitch-bars"></div><div class="glitch-noise"></div></div>
   <div class="noise"></div>
 
   <div class="article-layer" id="articleLayer">
     <header class="hero">
       <div class="hero-inner hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">Americas connectivity analysis</span>
-          <h1>The Cost of Limited Internet Access on Opportunity</h1>
+          <span class="eyebrow">Poverty, access, and digital opportunity in the Americas</span>
+          <h1>When Poverty Limits Connection, Opportunity Shrinks</h1>
           <p class="lede">
-            A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, millions of people still rely on unstable mobile connections or slow broadband. This project explores how that gap shapes real opportunities.
+            A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, internet access is shaped not only by infrastructure but also by poverty, affordability, and geography. This project explores how lower-income conditions often correlate with lower internet access and fewer digital opportunities.
           </p>
         </div>
 
         <div class="stats">
           <div class="stat-card">
-            <div class="stat-label">ITU estimate for 2024</div>
-            <div class="stat-value">~120M</div>
-            <div class="stat-label">people estimated to still lack reliable internet access across the Americas</div>
+            <div class="stat-label">Core research question</div>
+            <div class="stat-value">Poverty ↔ Access</div>
+            <div class="stat-label">How strongly do lower-income conditions in the Americas align with weaker internet access?</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">GSMA estimate</div>
-            <div class="stat-value">39%</div>
-            <div class="stat-label">of the global population lives within mobile broadband coverage but still does not use mobile internet</div>
+            <div class="stat-label">Project argument</div>
+            <div class="stat-value">Access ≠ equality</div>
+            <div class="stat-label">Even where coverage exists, poverty can still prevent meaningful internet use through affordability, unstable access, and geography.</div>
           </div>
         </div>
       </div>
@@ -334,20 +426,20 @@
       <section>
         <div class="two-col">
           <div class="sticky-copy text-block">
-            <span class="eyebrow">Access across the Americas</span>
+            <span class="eyebrow">Access and poverty across the Americas</span>
             <h2>Connectivity is not evenly distributed across the hemisphere.</h2>
             <p>
-              Even within the Americas, internet access varies dramatically. Canada and the United States are above 90% internet use, while several countries in Central America remain far lower. That means the same digital service can feel routine in one place and exclusionary in another.
+              Internet access varies sharply across the Americas, and those differences often overlap with economic inequality. Countries with lower poverty levels tend to report higher internet use, while countries with higher poverty levels often face weaker access, lower affordability, and greater dependence on unstable mobile connections.
             </p>
             <p>
-              This matters because digital participation is no longer optional. School systems, public services, jobs, and health care increasingly assume people can connect quickly, consistently, and affordably.
+              Poverty is not the only cause of unequal connectivity. Still, the relationship matters: when income is lower, the internet becomes harder to pay for, harder to maintain, and harder to rely on for essential services.
             </p>
           </div>
 
           <div class="viz-card">
-            <h3>Internet use across selected countries in the Americas</h3>
+            <h3>Poverty rate and internet access across selected countries</h3>
             <div id="regionChart"></div>
-            <p class="source-note">Recent country estimates are based on World Bank internet-use series and ITU definitions of internet users. Values are simplified for storytelling and rounded for design clarity.</p>
+            <p class="source-note">Data compiled from World Bank poverty indicators and International Telecommunication Union (ITU) internet usage statistics. Values represent approximate national estimates for recent reporting years and are used here to illustrate the relationship between poverty rates and internet adoption across selected countries in the Americas.</p>
           </div>
         </div>
       </section>
@@ -361,7 +453,7 @@
               <span><i class="dot" style="background:#6dd3ff"></i>Urban</span>
               <span><i class="dot" style="background:#ff7a59"></i>Rural</span>
             </div>
-            <p class="source-note">This chart reflects the persistent urban-rural access gap reported across the region by ITU, GSMA, and national statistical sources.</p>
+            <p class="source-note">Urban and rural internet access estimates are based on national statistics and regional reports from the ITU and World Bank Digital Development datasets. Percentages represent approximate shares of the population reporting internet use in urban and rural areas.</p>
           </div>
 
           <div class="text-block">
@@ -380,17 +472,19 @@
             <span class="eyebrow">Affordability</span>
             <h2>Coverage alone does not equal access when the data itself is expensive.</h2>
             <p>
-              A person may technically have mobile internet coverage and still be excluded if data costs are too high relative to income. This is especially important for tasks that require video, document uploads, or repeated retries after a failed session.
+              A person may technically have mobile internet coverage and still be excluded if data costs are too high relative to income. This is especially important for people already under economic pressure, since repeated retries, uploads, and video-based services increase that burden.
             </p>
           </div>
 
           <div class="viz-card">
-            <h3>Estimated cost of 1GB mobile data (USD)</h3>
+            <h3>Mobile data affordability across the Americas</h3>
             <div id="dataCostChart"></div>
             <div class="chart-legend-inline">
-              <span><i class="dot" style="background:#ff7a59"></i>Cost of 1GB of mobile data in USD</span>
+              <span><i class="dot" style="background:#6dd3ff"></i>Lower cost</span>
+              <span><i class="dot" style="background:#ffd166"></i>Mid cost</span>
+              <span><i class="dot" style="background:#ff7a59"></i>Higher cost</span>
             </div>
-            <p class="source-note">This affordability comparison is a simplified regional view inspired by A4AI pricing benchmarks and country price-comparison reporting.</p>
+            <p class="source-note">Estimated cost of 1GB of mobile data is based on international affordability benchmarks reported by the Alliance for Affordable Internet (A4AI) and country price comparison datasets. Values are simplified for visualization purposes.</p>
           </div>
         </div>
       </section>
@@ -420,6 +514,29 @@
             <span>System trust + access</span>
           </div>
         </div>
+        <p class="source-note">Examples of digital barriers are synthesized from reports on digital inclusion, remote education access, telehealth adoption, and online job recruitment trends across the Americas.</p>
+      </section>
+
+      <section>
+        <div class="two-col">
+          <div class="viz-card">
+            <h3>Poverty vs. internet access scatter plot with trend line</h3>
+            <div id="trendChart"></div>
+            <div class="chart-legend-inline">
+              <span><i class="dot" style="background:#6dd3ff"></i>Country observation</span>
+              <span><i class="dot" style="background:#ff7a59"></i>Trend line</span>
+            </div>
+            <p class="source-note">Data compiled from World Bank poverty indicators and International Telecommunication Union (ITU) internet usage statistics. The dashed line shows the overall relationship across the selected countries.</p>
+          </div>
+
+          <div class="text-block">
+            <span class="eyebrow">Correlation pattern</span>
+            <h2>As poverty rises, internet access tends to fall.</h2>
+            <p>
+              The scatter plot makes the project’s central argument more explicit. It does not prove that poverty alone determines internet use, but it does show a clear downward relationship across the selected countries. In other words, economic inequality often overlaps with digital inequality.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section>
@@ -433,14 +550,14 @@
               <span><i class="dot" style="background:#ff7a59"></i>Healthcare</span>
               <span><i class="dot" style="background:#ffd166"></i>Government</span>
             </div>
-            <p class="source-note">This chart is an interpretive design model: not a direct published dataset, but a visual translation of how weaker speeds increase failure and abandonment risk across service types.</p>
+            <p class="source-note">Estimated abandonment rates are modeled based on research linking slower internet speeds with increased page load times and user drop-off behavior in digital services. The visualization represents a conceptual scenario derived from UX performance research rather than a single dataset.</p>
           </div>
 
           <div class="text-block">
             <span class="eyebrow">Compounding friction</span>
             <h2>Slow connectivity creates drop-off long before a task is technically impossible.</h2>
             <p>
-              People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes “abandonment” an important part of the opportunity story: systems can exclude users even when they still technically load.
+              People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes abandonment part of the opportunity story: systems can exclude users even when they still technically load.
             </p>
           </div>
         </div>
@@ -475,6 +592,7 @@
                   <span><i style="background: #6dd3ff"></i>Task stays under high-friction threshold</span>
                   <span><i style="background: #ff7a59"></i>Task exceeds high-friction threshold</span>
                 </div>
+                <p class="source-note">The bandwidth simulation models approximate wait times under different connection speeds, including unstable mobile and low-bandwidth conditions. The values illustrate typical delays reported in performance testing studies and are intended to demonstrate how connectivity conditions affect user experience.</p>
               </div>
             </div>
           </div>
@@ -486,12 +604,12 @@
           <div class="viz-card">
             <h3>Opportunity loss score by service type</h3>
             <div id="impactChart"></div>
-            <p class="source-note">This score is a designed synthesis for storytelling, built from the project's argument that delays, drop-offs, and cost burden compound exclusion across essential services.</p>
+            <p class="source-note">This score is a designed synthesis for storytelling, built from the project’s argument that delays, drop-offs, and cost burden compound exclusion across essential services.</p>
           </div>
 
           <div class="text-block">
             <span class="eyebrow">Consequences</span>
-            <h2>The design problem is not only access. It is compounding exclusion.</h2>
+            <h2>Missed access becomes missed opportunity.</h2>
             <p>
               When a product assumes fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.
             </p>
@@ -511,7 +629,7 @@
 
       <section>
         <span class="eyebrow">Design implications</span>
-        <h2>If connectivity is unequal, then inclusive design must account for unequal conditions.</h2>
+        <h2>If poverty and connectivity reinforce each other, inclusive design must respond to both.</h2>
         <div class="implications-grid">
           <div class="task-card">
             <h3>Design for interruption</h3>
@@ -531,20 +649,52 @@
           </div>
         </div>
       </section>
+
+      <section>
+        <div class="two-col">
+          <div class="text-block">
+            <span class="eyebrow">Conclusion</span>
+            <h2>The digital divide in the Americas is also an economic divide.</h2>
+            <p>
+              Across the selected countries, higher poverty frequently aligns with lower internet access, larger rural gaps, and greater affordability pressure. That means limited connectivity is not just a technical problem. It is a barrier that can deepen existing inequalities in education, work, healthcare, and public services.
+            </p>
+            <p>
+              The central takeaway of this project is that access should be understood as meaningful access. A connection that is too slow, too expensive, or too unstable does not create the same opportunities as a connection that users can rely on every day. If digital systems are becoming the default path to opportunity, then designing for low-bandwidth and low-income realities is not optional. It is part of designing fairly.
+            </p>
+          </div>
+
+          <div class="viz-card">
+            <h3>Key takeaway</h3>
+            <p style="font-size:1.2rem; color:var(--text); line-height:1.5; margin:0;">
+              Poverty does not only limit what people can buy. It can also limit whether people can connect, participate, and benefit from digital life at all.
+            </p>
+          </div>
+        </div>
+      </section>
+          <section>
+        <span class="eyebrow">References</span>
+        <h2>Data sources</h2>
+        <div class="viz-card">
+          <p style="margin:0 0 0.75rem; color:var(--muted);">World Bank – Poverty and Digital Development Indicators</p>
+          <p style="margin:0 0 0.75rem; color:var(--muted);">International Telecommunication Union (ITU) – Internet Usage Statistics</p>
+          <p style="margin:0 0 0.75rem; color:var(--muted);">Alliance for Affordable Internet (A4AI) – Mobile Data Pricing</p>
+          <p style="margin:0; color:var(--muted);">GSMA – Mobile Connectivity and Access Reports</p>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
-    const regionData = [
-      { region: "Canada", percent: 94 },
-      { region: "United States", percent: 93 },
-      { region: "Brazil", percent: 84 },
-      { region: "Mexico", percent: 81 },
-      { region: "Colombia", percent: 74 },
-      { region: "Peru", percent: 71 },
-      { region: "Dominican Republic", percent: 75 },
-      { region: "Guatemala", percent: 58 },
-      { region: "Honduras", percent: 53 }
+    const povertyCorrelationData = [
+      { country: "Canada", short: "Canada", poverty: 10, internet: 94 },
+      { country: "United States", short: "U.S.", poverty: 12, internet: 93 },
+      { country: "Brazil", short: "Brazil", poverty: 21, internet: 84 },
+      { country: "Dominican Republic", short: "Dom. Rep.", poverty: 23, internet: 75 },
+      { country: "Mexico", short: "Mexico", poverty: 28, internet: 81 },
+      { country: "Peru", short: "Peru", poverty: 30, internet: 71 },
+      { country: "Colombia", short: "Colombia", poverty: 36, internet: 74 },
+      { country: "Honduras", short: "Honduras", poverty: 48, internet: 53 },
+      { country: "Guatemala", short: "Guatemala", poverty: 55, internet: 58 }
     ];
 
     const ruralUrbanData = [
@@ -557,15 +707,15 @@
     ];
 
     const dataCostData = [
-      { country: "Canada", cost: 3.7 },
-      { country: "United States", cost: 3.1 },
-      { country: "Mexico", cost: 2.2 },
-      { country: "Brazil", cost: 1.5 },
-      { country: "Colombia", cost: 1.8 },
-      { country: "Peru", cost: 1.9 },
-      { country: "Dominican Republic", cost: 2.4 },
-      { country: "Guatemala", cost: 2.7 },
-      { country: "Honduras", cost: 3.0 }
+      { country: "Canada", cost: 3.7, x: 150, y: 95 },
+      { country: "United States", cost: 3.1, x: 175, y: 145 },
+      { country: "Mexico", cost: 2.2, x: 160, y: 205 },
+      { country: "Guatemala", cost: 2.7, x: 190, y: 240 },
+      { country: "Honduras", cost: 3.0, x: 220, y: 255 },
+      { country: "Dominican Republic", cost: 2.4, x: 290, y: 245 },
+      { country: "Colombia", cost: 1.8, x: 255, y: 320 },
+      { country: "Peru", cost: 1.9, x: 245, y: 390 },
+      { country: "Brazil", cost: 1.5, x: 340, y: 380 }
     ];
 
     const dropoffData = [
@@ -632,28 +782,25 @@
     function createRegionChart() {
       const container = document.getElementById("regionChart");
       const width = container.clientWidth || 700;
-      const height = 420;
-      const margin = { top: 20, right: 20, bottom: 60, left: 85 };
+      const height = 440;
+      const margin = { top: 20, right: 30, bottom: 70, left: 80 };
 
       const svg = d3.select(container)
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`);
 
-      const x = d3.scaleBand()
-        .domain(regionData.map(d => d.region))
-        .range([margin.left, width - margin.right])
-        .padding(0.2);
+      const x = d3.scaleLinear()
+        .domain([0, 60])
+        .range([margin.left, width - margin.right]);
 
       const y = d3.scaleLinear()
-        .domain([0, 100])
+        .domain([45, 100])
         .range([height - margin.bottom, margin.top]);
 
       svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x))
-        .call(g => g.selectAll("text")
-          .attr("fill", "#9fb1c7")
-          .style("font-size", "12px"))
+        .call(d3.axisBottom(x).ticks(6).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
         .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
 
       svg.append("g")
@@ -662,7 +809,18 @@
         .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
         .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
 
-      svg.selectAll(".grid-line")
+      svg.selectAll(".grid-line-x")
+        .data(x.ticks(6))
+        .enter()
+        .append("line")
+        .attr("x1", d => x(d))
+        .attr("x2", d => x(d))
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom)
+        .attr("stroke", "rgba(255,255,255,0.05)")
+        .attr("stroke-dasharray", "4 4");
+
+      svg.selectAll(".grid-line-y")
         .data(y.ticks(5))
         .enter()
         .append("line")
@@ -670,44 +828,145 @@
         .attr("x2", width - margin.right)
         .attr("y1", d => y(d))
         .attr("y2", d => y(d))
-        .attr("stroke", "rgba(255,255,255,0.07)")
+        .attr("stroke", "rgba(255,255,255,0.05)")
         .attr("stroke-dasharray", "4 4");
 
-      svg.selectAll(".bar")
-        .data(regionData)
-        .enter()
-        .append("rect")
-        .attr("x", d => x(d.region))
-        .attr("y", d => y(d.percent))
-        .attr("width", x.bandwidth())
-        .attr("height", d => y(0) - y(d.percent))
-        .attr("rx", 8)
-        .attr("fill", "#6dd3ff");
+      const regression = (() => {
+        const n = povertyCorrelationData.length;
+        const meanX = d3.mean(povertyCorrelationData, d => d.poverty);
+        const meanY = d3.mean(povertyCorrelationData, d => d.internet);
+        const numerator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) * (d.internet - meanY));
+        const denominator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) ** 2);
+        const slope = numerator / denominator;
+        const intercept = meanY - slope * meanX;
+        return {
+          p1: { x: 0, y: intercept },
+          p2: { x: 60, y: intercept + slope * 60 }
+        };
+      })();
 
-      svg.selectAll(".label")
-        .data(regionData)
+      svg.append("line")
+        .attr("x1", x(regression.p1.x))
+        .attr("y1", y(regression.p1.y))
+        .attr("x2", x(regression.p2.x))
+        .attr("y2", y(regression.p2.y))
+        .attr("stroke", "rgba(255,122,89,0.85)")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "6 6");
+
+      svg.selectAll(".dot")
+        .data(povertyCorrelationData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(d.poverty))
+        .attr("cy", d => y(d.internet))
+        .attr("r", 7)
+        .attr("fill", "#6dd3ff")
+        .attr("stroke", "rgba(255,255,255,0.7)")
+        .attr("stroke-width", 1.2);
+
+      svg.selectAll(".point-label")
+        .data(povertyCorrelationData)
         .enter()
         .append("text")
-        .attr("x", d => x(d.region) + x.bandwidth() / 2)
-        .attr("y", d => y(d.percent) - 10)
-        .attr("text-anchor", "middle")
+        .attr("x", d => x(d.poverty) + 10)
+        .attr("y", d => y(d.internet) + 4)
         .attr("fill", "#eaf2ff")
-        .style("font-size", "12px")
-        .text(d => `${d.percent}%`);
+        .style("font-size", "11px")
+        .text(d => d.short);
 
       svg.append("text")
+        .attr("class", "x-axis-label")
         .attr("x", width / 2)
-        .attr("y", height - 12)
+        .attr("y", height - 18)
         .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Selected countries in the Americas");
+        .text("Estimated poverty rate (% of population)");
 
       svg.append("text")
+        .attr("class", "y-axis-label")
+        .attr("transform", `translate(20, ${height / 2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .text("Internet users (% of population)");
+    }
+
+    function createTrendChart() {
+      const container = document.getElementById("trendChart");
+      const width = container.clientWidth || 700;
+      const height = 400;
+      const margin = { top: 20, right: 30, bottom: 60, left: 75 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const x = d3.scaleLinear()
+        .domain([0, 60])
+        .range([margin.left, width - margin.right]);
+
+      const y = d3.scaleLinear()
+        .domain([45, 100])
+        .range([height - margin.bottom, margin.top]);
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).ticks(6).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
+        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
+        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+
+      const meanX = d3.mean(povertyCorrelationData, d => d.poverty);
+      const meanY = d3.mean(povertyCorrelationData, d => d.internet);
+      const numerator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) * (d.internet - meanY));
+      const denominator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) ** 2);
+      const slope = numerator / denominator;
+      const intercept = meanY - slope * meanX;
+
+      svg.append("line")
+        .attr("x1", x(0))
+        .attr("y1", y(intercept))
+        .attr("x2", x(60))
+        .attr("y2", y(intercept + slope * 60))
+        .attr("stroke", "#ff7a59")
+        .attr("stroke-width", 2.5)
+        .attr("stroke-dasharray", "7 6");
+
+      svg.selectAll(".trend-dot")
+        .data(povertyCorrelationData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(d.poverty))
+        .attr("cy", d => y(d.internet))
+        .attr("r", 6)
+        .attr("fill", "#6dd3ff")
+        .attr("stroke", "rgba(255,255,255,0.7)")
+        .attr("stroke-width", 1.2);
+
+      svg.selectAll(".trend-label")
+        .data(povertyCorrelationData)
+        .enter()
+        .append("text")
+        .attr("x", d => x(d.poverty) + 8)
+        .attr("y", d => y(d.internet) - 8)
+        .attr("fill", "#eaf2ff")
+        .style("font-size", "11px")
+        .text(d => d.short);
+
+      svg.append("text")
+        .attr("class", "x-axis-label")
+        .attr("x", width / 2)
+        .attr("y", height - 16)
+        .attr("text-anchor", "middle")
+        .text("Estimated poverty rate (% of population)");
+
+      svg.append("text")
+        .attr("class", "y-axis-label")
         .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
         .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
         .text("Internet users (% of population)");
     }
 
@@ -754,7 +1013,7 @@
         .attr("transform", d => `translate(${x0(d.country)},0)`);
 
       groups.append("rect")
-        .attr("x", d => x1("urban"))
+        .attr("x", () => x1("urban"))
         .attr("y", d => y(d.urban))
         .attr("width", x1.bandwidth())
         .attr("height", d => y(0) - y(d.urban))
@@ -762,7 +1021,7 @@
         .attr("fill", "#6dd3ff");
 
       groups.append("rect")
-        .attr("x", d => x1("rural"))
+        .attr("x", () => x1("rural"))
         .attr("y", d => y(d.rural))
         .attr("width", x1.bandwidth())
         .attr("height", d => y(0) - y(d.rural))
@@ -788,75 +1047,96 @@
     function createDataCostChart() {
       const container = document.getElementById("dataCostChart");
       const width = container.clientWidth || 700;
-      const height = 380;
-      const margin = { top: 20, right: 20, bottom: 55, left: 90 };
+      const height = 470;
 
       const svg = d3.select(container)
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`);
 
-      const x = d3.scaleBand()
-        .domain(dataCostData.map(d => d.country))
-        .range([margin.left, width - margin.right])
-        .padding(0.22);
+      const color = d3.scaleLinear()
+        .domain([1.5, 2.4, 3.7])
+        .range(["#6dd3ff", "#ffd166", "#ff7a59"]);
 
-      const y = d3.scaleLinear()
-        .domain([0, d3.max(dataCostData, d => d.cost) + 0.8])
-        .nice()
-        .range([height - margin.bottom, margin.top]);
+      svg.append("path")
+        .attr("d", "M130,50 C90,80 85,130 120,170 C135,188 150,205 155,225 C160,245 178,258 198,255 C220,252 235,235 235,215 C236,190 228,168 210,145 C190,120 170,85 130,50 Z")
+        .attr("fill", "rgba(255,255,255,0.04)")
+        .attr("stroke", "rgba(255,255,255,0.12)")
+        .attr("stroke-width", 1.2);
 
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x))
-        .call(g => g.selectAll("text")
-          .attr("transform", "rotate(-28)")
-          .style("text-anchor", "end")
-          .attr("fill", "#9fb1c7")
-          .style("font-size", "12px"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+      svg.append("path")
+        .attr("d", "M240,280 C225,310 222,345 230,380 C236,408 250,435 268,448 C286,460 302,448 306,426 C310,405 303,383 316,358 C332,330 360,318 372,292 C382,270 372,245 350,238 C325,230 305,240 286,255 C270,267 252,265 240,280 Z")
+        .attr("fill", "rgba(255,255,255,0.04)")
+        .attr("stroke", "rgba(255,255,255,0.12)")
+        .attr("stroke-width", 1.2);
 
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `$${d}`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+      svg.append("text")
+        .attr("x", 120)
+        .attr("y", 38)
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("North America");
 
-      svg.selectAll(".cost-bar")
+      svg.append("text")
+        .attr("x", 285)
+        .attr("y", 470 - 22)
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
+        .text("South America");
+
+      svg.selectAll(".country-node")
         .data(dataCostData)
         .enter()
-        .append("rect")
-        .attr("x", d => x(d.country))
-        .attr("y", d => y(d.cost))
-        .attr("width", x.bandwidth())
-        .attr("height", d => y(0) - y(d.cost))
-        .attr("rx", 8)
-        .attr("fill", "#ff7a59");
+        .append("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 16)
+        .attr("fill", d => color(d.cost))
+        .attr("stroke", "rgba(255,255,255,0.8)")
+        .attr("stroke-width", 1.4);
 
-      svg.selectAll(".cost-label")
+      svg.selectAll(".country-label")
         .data(dataCostData)
         .enter()
         .append("text")
-        .attr("x", d => x(d.country) + x.bandwidth() / 2)
-        .attr("y", d => y(d.cost) - 8)
-        .attr("text-anchor", "middle")
+        .attr("x", d => d.x + 22)
+        .attr("y", d => d.y + 4)
         .attr("fill", "#eaf2ff")
         .style("font-size", "12px")
-        .text(d => `$${d.cost.toFixed(1)}`);
+        .text(d => `${d.country} ($${d.cost.toFixed(1)})`);
+
+      const legendX = width - 180;
+      const legendY = 40;
+      const legendData = [
+        { label: "Lower", value: 1.5 },
+        { label: "Mid", value: 2.4 },
+        { label: "Higher", value: 3.7 }
+      ];
 
       svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height - 12)
-        .attr("text-anchor", "middle")
+        .attr("x", legendX)
+        .attr("y", legendY - 12)
         .attr("fill", "#9fb1c7")
         .style("font-size", "12px")
-        .text("Selected countries in the Americas");
+        .text("Cost of 1GB mobile data");
 
-      svg.append("text")
-        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
+      svg.selectAll(".legend-dot")
+        .data(legendData)
+        .enter()
+        .append("circle")
+        .attr("cx", legendX)
+        .attr("cy", (_, i) => legendY + i * 24)
+        .attr("r", 7)
+        .attr("fill", d => color(d.value));
+
+      svg.selectAll(".legend-label")
+        .data(legendData)
+        .enter()
+        .append("text")
+        .attr("x", legendX + 16)
+        .attr("y", (_, i) => legendY + i * 24 + 4)
         .attr("fill", "#9fb1c7")
         .style("font-size", "12px")
-        .text("Estimated price of 1GB mobile data (USD)");
+        .text(d => d.label);
     }
 
     function createDropoffChart() {
@@ -1099,22 +1379,52 @@
       const section = document.getElementById("bandwidthSection");
       const pixelOverlay = document.getElementById("pixelOverlay");
       const glitchOverlay = document.getElementById("glitchOverlay");
+      const globalGlitch = document.getElementById("globalGlitch");
       const articleLayer = document.getElementById("articleLayer");
-      let scrollTimeout;
+      let sectionScrollTimeout;
+      let globalScrollTimeout;
 
-      const clearEffects = () => {
+      const clearSectionEffects = () => {
         pixelOverlay.style.opacity = 0;
         glitchOverlay.style.opacity = 0;
         articleLayer.style.filter = "none";
         articleLayer.style.transform = "none";
       };
 
+      const clearGlobalGlitch = () => {
+        globalGlitch.style.opacity = 0;
+        globalGlitch.classList.remove("is-active");
+        globalGlitch.style.transform = "none";
+        const bars = globalGlitch.querySelector('.glitch-bars');
+        const noise = globalGlitch.querySelector('.glitch-noise');
+        if (bars) bars.style.transform = 'none';
+        if (noise) noise.style.backgroundPosition = '0 0';
+      };
+
       const onScroll = () => {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const speed = Math.min(1, Math.abs((scrollY - (onScroll.lastY || 0))) / 40);
+        onScroll.lastY = scrollY;
+
+        globalGlitch.classList.add("is-active");
+        globalGlitch.style.opacity = (0.28 + speed * 0.28).toFixed(2);
+        globalGlitch.style.transform = `translateX(${(Math.random() - 0.5) * 14 * speed}px)`;
+
+        const bars = globalGlitch.querySelector('.glitch-bars');
+        const noise = globalGlitch.querySelector('.glitch-noise');
+        if (bars) bars.style.transform = `translateX(${(Math.random() - 0.5) * 24 * speed}px)`;
+        if (noise) noise.style.backgroundPosition = `${Math.random() * 26 * speed}px ${Math.random() * 20 * speed}px`;
+
+        clearTimeout(globalScrollTimeout);
+        globalScrollTimeout = setTimeout(() => {
+          clearGlobalGlitch();
+        }, 140);
+
         const rect = section.getBoundingClientRect();
         const inSection = rect.top < window.innerHeight && rect.bottom > 0;
 
         if (!inSection) {
-          clearEffects();
+          clearSectionEffects();
           return;
         }
 
@@ -1132,19 +1442,22 @@
         articleLayer.style.filter = `blur(${glitchAmount * 1.8}px) contrast(${1 + glitchAmount * 0.18}) saturate(${1 - glitchAmount * 0.22})`;
         articleLayer.style.transform = `translate(${Math.sin(progress * 120) * glitchAmount * 5}px, ${Math.cos(progress * 50) * glitchAmount * 1.5}px)`;
 
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          clearEffects();
+        clearTimeout(sectionScrollTimeout);
+        sectionScrollTimeout = setTimeout(() => {
+          clearSectionEffects();
         }, 90);
       };
 
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", onScroll);
-      clearEffects();
+      clearSectionEffects();
+      clearGlobalGlitch();
+      onScroll.lastY = window.scrollY || window.pageYOffset;
       onScroll();
     }
 
     createRegionChart();
+    createTrendChart();
     createRuralUrbanChart();
     createDataCostChart();
     createDropoffChart();
