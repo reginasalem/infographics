@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>When Poverty Limits Connection, Opportunity Shrinks</title>
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
-      --bg: #081018;
-      --panel: #0f1a24;
+      --bg: #071018;
+      --bg-2: #0a1622;
+      --panel: rgba(15, 26, 36, 0.82);
+      --panel-strong: rgba(13, 23, 34, 0.94);
       --text: #eaf2ff;
       --muted: #9fb1c7;
       --accent: #6dd3ff;
@@ -16,7 +17,16 @@
       --accent-3: #ffd166;
       --danger: #ff5c8a;
       --line: rgba(255,255,255,0.08);
-      --max: 1200px;
+      --shadow: 0 24px 60px rgba(0,0,0,0.28);
+      --max: 1220px;
+      --map-height: 76vh;
+      --signal-blur: 0px;
+      --signal-sat: 1;
+      --signal-contrast: 1;
+      --signal-shift: 0px;
+      --signal-static: 0;
+      --signal-bars: 0;
+      --signal-pixel: 0px;
     }
 
     * { box-sizing: border-box; }
@@ -26,151 +36,58 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top, rgba(109,211,255,0.08), transparent 30%),
-        linear-gradient(180deg, #061019 0%, #081018 35%, #09131c 100%);
+        radial-gradient(circle at 20% 0%, rgba(109,211,255,0.1), transparent 24%),
+        radial-gradient(circle at 80% 10%, rgba(255,122,89,0.08), transparent 20%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
       line-height: 1.6;
       overflow-x: hidden;
+    }
+
+    .bg-orb,
+    .bg-orb-2 {
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.14;
+    }
+
+    .bg-orb {
+      width: 280px;
+      height: 280px;
+      background: var(--accent);
+      top: 8%;
+      left: -60px;
+      animation: floatOrb 14s ease-in-out infinite;
+    }
+
+    .bg-orb-2 {
+      width: 240px;
+      height: 240px;
+      background: var(--accent-2);
+      top: 52%;
+      right: -40px;
+      animation: floatOrb 17s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatOrb {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(18px,-22px) scale(1.06); }
     }
 
     .article-layer {
       position: relative;
       z-index: 1;
-      transition: filter 200ms ease, transform 180ms ease;
-    }
-
-    .pixel-overlay,
-    .glitch-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 10;
-      opacity: 0;
-      transition: opacity 120ms ease;
-    }
-
-    .pixel-overlay {
-      background-image:
-        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-      background-size: 14px 14px;
-      mix-blend-mode: screen;
-    }
-
-    .glitch-overlay::before,
-    .glitch-overlay::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 18px,
-          rgba(255, 92, 138, 0.18) 19px,
-          rgba(109, 211, 255, 0.18) 21px,
-          transparent 23px,
-          transparent 40px
-        );
-      animation: glitchShift 140ms steps(2, end) infinite;
-    }
-
-    .glitch-overlay::after {
-      transform: translateX(10px);
-      opacity: 0.95;
-      animation-duration: 110ms;
-    }
-
-    .global-glitch {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 14;
-      opacity: 0;
-      transition: opacity 60ms linear;
-      overflow: hidden;
-    }
-
-    .global-glitch::before,
-    .global-glitch::after,
-    .global-glitch .glitch-bars,
-    .global-glitch .glitch-noise {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-    }
-
-    .global-glitch::before {
-      content: "";
-      background:
-        repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 20px,
-          rgba(255, 80, 120, 0.14) 21px,
-          rgba(0, 229, 255, 0.14) 23px,
-          transparent 25px,
-          transparent 44px
-        );
-      mix-blend-mode: screen;
-    }
-
-    .global-glitch::after {
-      content: "";
-      background:
-        linear-gradient(90deg,
-          transparent 0%,
-          rgba(255, 0, 92, 0.08) 18%,
-          transparent 36%,
-          rgba(0, 229, 255, 0.08) 64%,
-          transparent 82%
-        );
-      filter: blur(0.8px);
-      mix-blend-mode: screen;
-    }
-
-    .global-glitch .glitch-bars {
-      background:
-        repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 52px,
-          rgba(255,255,255,0.08) 53px,
-          rgba(255,255,255,0.08) 56px,
-          transparent 57px,
-          transparent 110px
-        );
-      mix-blend-mode: screen;
-    }
-
-    .global-glitch .glitch-noise {
-      background-image:
-        radial-gradient(circle, rgba(255,255,255,0.18) 0.6px, transparent 0.9px);
-      background-size: 8px 8px;
-      mix-blend-mode: screen;
-    }
-
-    .global-glitch.is-active::before,
-    .global-glitch.is-active::after,
-    .global-glitch.is-active .glitch-bars,
-    .global-glitch.is-active .glitch-noise {
-      opacity: 1;
-    }
-
-    @keyframes glitchShift {
-      0% { transform: translate(0, 0); }
-      25% { transform: translate(-6px, 2px); }
-      50% { transform: translate(4px, -1px); }
-      75% { transform: translate(-2px, 1px); }
-      100% { transform: translate(0, 0); }
     }
 
     .noise {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 9;
-      opacity: 0.05;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.3) 0.5px, transparent 0.8px);
+      z-index: 2;
+      opacity: 0.035;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.3) 0.55px, transparent 0.8px);
       background-size: 8px 8px;
     }
 
@@ -178,8 +95,8 @@
       min-height: 100vh;
       display: grid;
       align-items: center;
-      border-bottom: 1px solid var(--line);
       padding: 7rem 1.25rem 4rem;
+      border-bottom: 1px solid var(--line);
     }
 
     .hero-inner,
@@ -188,20 +105,6 @@
       margin: 0 auto;
     }
 
-    .eyebrow {
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-size: 0.8rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    h1, h2, h3 { line-height: 1.05; margin: 0 0 1rem; }
-    h1 { font-size: clamp(2.8rem, 7vw, 6.8rem); max-width: 11ch; }
-    h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); }
-    h3 { font-size: 1.2rem; }
-
     .hero-grid {
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
@@ -209,29 +112,100 @@
       align-items: end;
     }
 
-    .hero-copy p,
-    .lede,
-    .text-block p { color: var(--muted); font-size: 1.08rem; max-width: 65ch; }
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 0.45rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(109,211,255,0.18);
+      background: rgba(109,211,255,0.06);
+    }
 
-    .stats {
-      display: grid;
-      gap: 1rem;
+    h1, h2, h3 { line-height: 1.05; margin: 0 0 1rem; }
+    h1 { font-size: clamp(2.4rem, 5.5vw, 5rem); max-width: 11ch; letter-spacing: -0.04em; }
+    h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); letter-spacing: -0.03em; }
+    h3 { font-size: 1.2rem; }
+
+    .lede,
+    .text-block p,
+    .hero-copy p {
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 66ch;
+    }
+
+    .hero-copy { animation: riseIn 900ms ease both; }
+    .stats { display: grid; gap: 1rem; animation: riseIn 980ms 120ms ease both; }
+
+    .hero-kicker {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+    }
+
+    .hero-chip {
+      padding: 0.55rem 0.8rem;
+      font-size: 0.86rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
     }
 
     .stat-card,
     .viz-card,
     .quote-card,
-    .task-card {
-      background: rgba(15, 26, 36, 0.86);
+    .task-card,
+    .ref-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)), var(--panel);
       border: 1px solid var(--line);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 1.2rem;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
+    }
+
+    .stat-card::before,
+    .viz-card::before,
+    .quote-card::before,
+    .task-card::before,
+    .ref-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      opacity: 0.6;
+    }
+
+    .stat-card:hover,
+    .viz-card:hover,
+    .quote-card:hover,
+    .task-card:hover,
+    .ref-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.14);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.34);
     }
 
     .stat-label { color: var(--muted); font-size: 0.92rem; }
-    .stat-value { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; }
+    .stat-value {
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(90deg, #fff, #bfe8ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
     main section {
       padding: 6rem 0;
@@ -240,7 +214,7 @@
 
     .two-col {
       display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
+      grid-template-columns: 0.94fr 1.06fr;
       gap: 2rem;
       align-items: start;
     }
@@ -248,7 +222,6 @@
     .sticky-copy {
       position: sticky;
       top: 2rem;
-      align-self: start;
     }
 
     .scenario-grid,
@@ -260,7 +233,8 @@
       margin-top: 1.5rem;
     }
 
-    .chart-legend-inline {
+    .chart-legend-inline,
+    .legend {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
@@ -269,13 +243,21 @@
       margin-top: 0.8rem;
     }
 
-    .chart-legend-inline .dot {
+    .chart-legend-inline .dot,
+    .legend i {
       display: inline-block;
       width: 10px;
       height: 10px;
       border-radius: 50%;
       margin-right: 0.45rem;
       vertical-align: middle;
+    }
+
+    .source-note,
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.85rem;
     }
 
     .task-card span {
@@ -285,38 +267,195 @@
       color: var(--accent);
     }
 
-    .quote-card p { margin: 0 0 0.75rem; }
-    .quote-card strong { color: var(--accent); }
+    svg { width: 100%; height: auto; display: block; }
 
-    .bandwidth-section {
-      position: relative;
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 700ms ease, transform 700ms ease;
     }
 
-    .bandwidth-stage {
-      position: relative;
-      min-height: 240vh;
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .x-axis-label,
-    .y-axis-label {
-      fill: #9fb1c7;
-      font-size: 12px;
-    }
-
-    .bandwidth-sticky {
-      position: sticky;
-      top: 0;
-      min-height: 100vh;
+    .scrolly {
       display: grid;
-      align-items: center;
-      padding: 2rem 0;
-    }
-
-    .bandwidth-panel {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-columns: minmax(260px, 0.82fr) minmax(420px, 1.18fr);
       gap: 1.5rem;
+      align-items: start;
+    }
+
+    .scrolly-steps { position: relative; z-index: 2; }
+
+    .step {
+      min-height: 62vh;
+      display: flex;
       align-items: center;
+      opacity: 0.42;
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .step.is-active {
+      opacity: 1;
+      transform: translateX(4px);
+    }
+
+    .step-card {
+      width: 100%;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 1.15rem;
+      box-shadow: var(--shadow);
+    }
+
+    .step-card p { color: var(--muted); margin: 0; }
+
+    .sticky-graphic {
+      position: sticky;
+      top: 8vh;
+      height: var(--map-height);
+      display: flex;
+      align-items: stretch;
+      z-index: 1;
+    }
+
+    .graphic-card {
+      width: 100%;
+      min-height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018)), var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-header,
+    .signal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .map-view-label {
+      color: var(--accent);
+      font-size: 0.86rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .map-wrap,
+    .signal-wrap { position: relative; width: 100%; height: calc(100% - 2.4rem); }
+
+    #map,
+    #signalGraphic { width: 100%; height: 100%; }
+
+    .legend-block {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      background: rgba(6, 14, 22, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 0.75rem;
+      backdrop-filter: blur(12px);
+      min-width: 170px;
+    }
+
+    .legend-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .legend-gradient {
+      height: 10px;
+      border-radius: 999px;
+      margin-bottom: 0.4rem;
+      background: linear-gradient(90deg, #6dd3ff, #ffd166, #ff7a59);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .legend-scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .signal-shell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      background: radial-gradient(circle at top, rgba(109,211,255,0.08), transparent 25%), rgba(8, 15, 24, 0.8);
+      filter: blur(var(--signal-blur)) saturate(var(--signal-sat)) contrast(var(--signal-contrast));
+      transform: translateX(var(--signal-shift));
+      transition: filter 120ms linear, transform 120ms linear;
+    }
+
+    .signal-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(180deg, rgba(255,255,255,calc(var(--signal-static) * 0.13)) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,calc(var(--signal-static) * 0.06)), transparent 30%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .signal-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 54px,
+        rgba(255,255,255,calc(var(--signal-bars) * 0.12)) 55px,
+        rgba(255,255,255,calc(var(--signal-bars) * 0.12)) 60px,
+        transparent 61px,
+        transparent 120px
+      );
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .pixel-mask {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: var(--signal-pixel) var(--signal-pixel);
+      opacity: calc(var(--signal-pixel) / 18);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .signal-stage {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 1rem;
+      height: 100%;
+      padding: 1rem;
+    }
+
+    .signal-copy {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .meter {
@@ -343,68 +482,60 @@
       font-size: 0.95rem;
     }
 
-    .legend {
+    .signal-chart-wrap {
+      padding: 1rem;
       display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-      color: var(--muted);
-      font-size: 0.92rem;
+      align-items: center;
     }
 
-    .legend i {
-      width: 12px;
-      height: 12px;
-      display: inline-block;
-      border-radius: 50%;
-      margin-right: 0.35rem;
+    .ref-card p { color: var(--muted); margin: 0 0 0.75rem; }
+    .ref-card p:last-child { margin-bottom: 0; }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .footer-note {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin-top: 1rem;
-    }
-
-    .source-note {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 0.8rem;
-    }
-
-    svg { width: 100%; height: auto; display: block; }
-
-    @media (max-width: 900px) {
+    @media (max-width: 980px) {
       .hero-grid,
       .two-col,
-      .bandwidth-panel,
+      .scrolly,
+      .signal-stage,
       .scenario-grid,
       .implications-grid,
       .quote-grid {
         grid-template-columns: 1fr;
       }
 
-      .sticky-copy { position: static; }
-      .bandwidth-sticky { min-height: auto; }
+      .sticky-copy,
+      .sticky-graphic {
+        position: static;
+      }
+
+      .sticky-graphic {
+        height: 60vh;
+      }
+
+      .step { min-height: auto; margin-bottom: 1rem; }
       header.hero { min-height: auto; padding-top: 5rem; }
     }
   </style>
 </head>
 <body>
-  <div class="pixel-overlay" id="pixelOverlay"></div>
-  <div class="glitch-overlay" id="glitchOverlay"></div>
-  <div class="global-glitch" id="globalGlitch"><div class="glitch-bars"></div><div class="glitch-noise"></div></div>
   <div class="noise"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb-2"></div>
 
   <div class="article-layer" id="articleLayer">
     <header class="hero">
       <div class="hero-inner hero-grid">
         <div class="hero-copy">
           <span class="eyebrow">Poverty, access, and digital opportunity in the Americas</span>
-          <h1>When Poverty Limits Connection, Opportunity Shrinks</h1>
+          <h1>Lack of Connection Limits Opportunity</h1>
           <p class="lede">
-            A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, internet access is shaped not only by infrastructure but also by poverty, affordability, and geography. This project explores how lower-income conditions often correlate with lower internet access and fewer digital opportunities.
+            <br>A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, internet access depends not only on infrastructure but also on poverty, affordability, and geography. <br><br>This project explores how lower-income conditions often correlate with lower internet access and with that fewer digital opportunities.
           </p>
+
         </div>
 
         <div class="stats">
@@ -423,28 +554,58 @@
     </header>
 
     <main>
-      <section>
-        <div class="two-col">
-          <div class="sticky-copy text-block">
-            <span class="eyebrow">Access and poverty across the Americas</span>
-            <h2>Connectivity is not evenly distributed across the hemisphere.</h2>
-            <p>
-              Internet access varies sharply across the Americas, and those differences often overlap with economic inequality. Countries with lower poverty levels tend to report higher internet use, while countries with higher poverty levels often face weaker access, lower affordability, and greater dependence on unstable mobile connections.
-            </p>
-            <p>
-              Poverty is not the only cause of unequal connectivity. Still, the relationship matters: when income is lower, the internet becomes harder to pay for, harder to maintain, and harder to rely on for essential services.
-            </p>
+      <section class="reveal">
+        <div class="scrolly" id="mapScrolly">
+          <div class="scrolly-steps">
+            <div class="step map-step" data-view="poverty">
+              <div class="step-card">
+                <span class="eyebrow">Access and poverty across the Americas</span>
+                <h2>Connectivity is not evenly distributed across the hemisphere.</h2>
+                <p>Countries with lower poverty levels tend to report higher internet use, while countries with higher poverty levels often face weaker access and greater dependency on fragile networks.</p>
+              </div>
+            </div>
+            <div class="step map-step" data-view="internet">
+              <div class="step-card">
+                <span class="eyebrow">Internet access</span>
+                <h2>Countries with stronger connectivity cluster differently.</h2>
+                <p>Moving from poverty to internet use makes the contrast clearer: higher access concentrates in fewer places, while lower-access countries are also more exposed to affordability and infrastructure gaps.</p>
+              </div>
+            </div>
+            <div class="step map-step" data-view="cost">
+              <div class="step-card">
+                <span class="eyebrow">Affordability</span>
+                <h2>Coverage alone does not equal meaningful access.</h2>
+                <p>Even where service exists, the cost of mobile data can still block participation. That matters most in places where internet use already overlaps with poverty pressure.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="viz-card">
-            <h3>Poverty rate and internet access across selected countries</h3>
-            <div id="regionChart"></div>
-            <p class="source-note">Data compiled from World Bank poverty indicators and International Telecommunication Union (ITU) internet usage statistics. Values represent approximate national estimates for recent reporting years and are used here to illustrate the relationship between poverty rates and internet adoption across selected countries in the Americas.</p>
+          <div class="sticky-graphic">
+            <div class="graphic-card">
+              <div class="map-header">
+                <div>
+                  <h3>Map of the Americas</h3>
+                  <div class="map-view-label" id="mapViewLabel">Poverty rate</div>
+                </div>
+              </div>
+              <div class="map-wrap">
+                <div id="map"></div>
+                <div class="legend-block">
+                  <div class="legend-title" id="legendTitle">Estimated poverty rate</div>
+                  <div class="legend-gradient" id="legendGradient"></div>
+                  <div class="legend-scale">
+                    <span id="legendMin">Low</span>
+                    <span id="legendMax">High</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        <p class="source-note">Data compiled from World Bank poverty indicators, International Telecommunication Union (ITU) internet usage statistics, and affordability benchmarks used for the mobile data comparison. The map uses a real GeoJSON country layer of the Americas.</p>
       </section>
 
-      <section>
+      <section class="reveal">
         <div class="two-col">
           <div class="viz-card">
             <h3>Urban vs. rural internet access</h3>
@@ -459,37 +620,12 @@
           <div class="text-block">
             <span class="eyebrow">Geography matters</span>
             <h2>Where you live still shapes what the internet can do for you.</h2>
-            <p>
-              The urban-rural divide is one of the clearest reasons opportunity becomes unequal. In dense cities, a student may stream lectures, upload files, and schedule appointments easily. In rural communities, the same actions may depend on weaker infrastructure, more expensive mobile data, or intermittent service.
-            </p>
+            <p>The urban-rural divide is one of the clearest reasons opportunity becomes unequal. In dense cities, a student may stream lectures, upload files, and schedule appointments easily. In rural communities, the same actions may depend on weaker infrastructure, more expensive mobile data, or intermittent service.</p>
           </div>
         </div>
       </section>
 
-      <section>
-        <div class="two-col">
-          <div class="text-block">
-            <span class="eyebrow">Affordability</span>
-            <h2>Coverage alone does not equal access when the data itself is expensive.</h2>
-            <p>
-              A person may technically have mobile internet coverage and still be excluded if data costs are too high relative to income. This is especially important for people already under economic pressure, since repeated retries, uploads, and video-based services increase that burden.
-            </p>
-          </div>
-
-          <div class="viz-card">
-            <h3>Mobile data affordability across the Americas</h3>
-            <div id="dataCostChart"></div>
-            <div class="chart-legend-inline">
-              <span><i class="dot" style="background:#6dd3ff"></i>Lower cost</span>
-              <span><i class="dot" style="background:#ffd166"></i>Mid cost</span>
-              <span><i class="dot" style="background:#ff7a59"></i>Higher cost</span>
-            </div>
-            <p class="source-note">Estimated cost of 1GB of mobile data is based on international affordability benchmarks reported by the Alliance for Affordable Internet (A4AI) and country price comparison datasets. Values are simplified for visualization purposes.</p>
-          </div>
-        </div>
-      </section>
-
-      <section>
+      <section class="reveal">
         <span class="eyebrow">Where the barriers show up</span>
         <h2>Low connectivity is not one problem. It creates many forms of friction.</h2>
         <div class="scenario-grid">
@@ -517,7 +653,7 @@
         <p class="source-note">Examples of digital barriers are synthesized from reports on digital inclusion, remote education access, telehealth adoption, and online job recruitment trends across the Americas.</p>
       </section>
 
-      <section>
+      <section class="reveal">
         <div class="two-col">
           <div class="viz-card">
             <h3>Poverty vs. internet access scatter plot with trend line</h3>
@@ -532,14 +668,12 @@
           <div class="text-block">
             <span class="eyebrow">Correlation pattern</span>
             <h2>As poverty rises, internet access tends to fall.</h2>
-            <p>
-              The scatter plot makes the project’s central argument more explicit. It does not prove that poverty alone determines internet use, but it does show a clear downward relationship across the selected countries. In other words, economic inequality often overlaps with digital inequality.
-            </p>
+            <p>The scatter plot makes the project’s central argument more explicit. It does not prove that poverty alone determines internet use, but it does show a clear downward relationship across the selected countries. In other words, economic inequality often overlaps with digital inequality.</p>
           </div>
         </div>
       </section>
 
-      <section>
+      <section class="reveal">
         <div class="two-col">
           <div class="viz-card">
             <h3>Estimated task abandonment under weaker connectivity</h3>
@@ -556,50 +690,84 @@
           <div class="text-block">
             <span class="eyebrow">Compounding friction</span>
             <h2>Slow connectivity creates drop-off long before a task is technically impossible.</h2>
-            <p>
-              People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes abandonment part of the opportunity story: systems can exclude users even when they still technically load.
-            </p>
+            <p>People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes abandonment part of the opportunity story: systems can exclude users even when they still technically load.</p>
           </div>
         </div>
       </section>
 
-      <section class="bandwidth-section" id="bandwidthSection">
-        <div class="bandwidth-stage">
-          <div class="bandwidth-sticky">
-            <div class="hero-inner bandwidth-panel">
-              <div class="text-block">
+      <section class="reveal">
+        <div class="scrolly" id="bandwidthScrolly">
+          <div class="scrolly-steps">
+            <div class="step bw-step" data-index="0">
+              <div class="step-card">
                 <span class="eyebrow">Scroll to simulate signal loss</span>
                 <h2>As the connection weakens, ordinary tasks become exhausting.</h2>
-                <p>
-                  This section intentionally glitches as you scroll. The visual effect turns slow internet into a feeling: unstable, fragmented, and frustrating. The chart updates from stronger connectivity to weaker connectivity as the article moves downward.
-                </p>
-                <div class="meter">
-                  <div class="meter-fill" id="meterFill"></div>
-                </div>
-                <div class="bandwidth-readout">
-                  <span>Signal strength</span>
-                  <strong id="speedLabel">15 Mbps</strong>
-                </div>
-                <p class="footer-note" id="taskCaption">
-                  Under stronger access, common digital tasks remain usable. Under weaker access, the same actions become slow or fail entirely.
-                </p>
+                <p>At stronger speeds, common digital tasks remain usable. Heavy tasks still take time, but users can usually finish them.</p>
               </div>
+            </div>
+            <div class="step bw-step" data-index="1">
+              <div class="step-card">
+                <span class="eyebrow">Moderate instability</span>
+                <h2>Delay becomes friction before it becomes failure.</h2>
+                <p>Once speeds drop, uploads, live sessions, and telehealth portals begin to feel unreliable. The system technically works, but the experience becomes fragile.</p>
+              </div>
+            </div>
+            <div class="step bw-step" data-index="2">
+              <div class="step-card">
+                <span class="eyebrow">Weak connection</span>
+                <h2>Uncertainty changes behavior.</h2>
+                <p>At low speeds, people stop trusting the flow. Repeated waiting, retries, and partial loads push them toward abandonment.</p>
+              </div>
+            </div>
+            <div class="step bw-step" data-index="3">
+              <div class="step-card">
+                <span class="eyebrow">Signal collapse</span>
+                <h2>Eventually the task itself starts to break apart.</h2>
+                <p>Very weak or unstable connections create a harsher form of exclusion: the interaction becomes cognitively exhausting, visually unstable, and easy to abandon.</p>
+              </div>
+            </div>
+          </div>
 
-              <div class="viz-card">
-                <h3>Estimated completion time for common tasks</h3>
-                <div id="taskChart"></div>
-                <div class="legend">
-                  <span><i style="background: #6dd3ff"></i>Task stays under high-friction threshold</span>
-                  <span><i style="background: #ff7a59"></i>Task exceeds high-friction threshold</span>
+          <div class="sticky-graphic">
+            <div class="graphic-card">
+              <div class="signal-header">
+                <div>
+                  <h3>Signal-loss simulation</h3>
+                  <div class="map-view-label" id="signalViewLabel">15 Mbps</div>
                 </div>
-                <p class="source-note">The bandwidth simulation models approximate wait times under different connection speeds, including unstable mobile and low-bandwidth conditions. The values illustrate typical delays reported in performance testing studies and are intended to demonstrate how connectivity conditions affect user experience.</p>
               </div>
+              <div class="signal-wrap">
+                <div class="signal-shell" id="signalShell">
+                  <div class="pixel-mask"></div>
+                  <div class="signal-stage">
+                    <div class="signal-copy">
+                      <p class="lede" style="font-size:1rem; max-width:40ch;">Scroll to see how lower bandwidth affects visually and make task completion slower.</p>
+                      <div class="meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                      </div>
+                      <div class="bandwidth-readout">
+                        <span>Signal strength</span>
+                        <strong id="speedLabel">15 Mbps</strong>
+                      </div>
+                      <p class="footer-note" id="taskCaption">Under stronger access, common digital tasks remain usable. Under weaker access, the same actions become slow or fail entirely.</p>
+                    </div>
+                    <div class="signal-chart-wrap">
+                      <div id="taskChart"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="legend-block">
+                  <div class="legend-title">Task outcome</div>
+                  <div class="legend"><span><i style="background:#6dd3ff"></i>Below high-friction threshold</span><span><i style="background:#ff7a59"></i>Exceeds high-friction threshold</span></div>
+                </div>
+              </div>
+              <p class="source-note">The bandwidth simulation models approximate wait times under different connection speeds, including unstable mobile and low-bandwidth conditions. The values illustrate typical delays reported in performance testing studies and are intended to demonstrate how connectivity conditions affect user experience.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section>
+      <section class="reveal">
         <div class="two-col">
           <div class="viz-card">
             <h3>Opportunity loss score by service type</h3>
@@ -610,9 +778,7 @@
           <div class="text-block">
             <span class="eyebrow">Consequences</span>
             <h2>Missed access becomes missed opportunity.</h2>
-            <p>
-              When a product assumes fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.
-            </p>
+            <p>When a product assumes fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.</p>
             <div class="quote-grid">
               <div class="quote-card">
                 <p>“I can open the form on my phone, but uploading the documents takes so long that I usually give up.”</p>
@@ -627,7 +793,7 @@
         </div>
       </section>
 
-      <section>
+      <section class="reveal">
         <span class="eyebrow">Design implications</span>
         <h2>If poverty and connectivity reinforce each other, inclusive design must respond to both.</h2>
         <div class="implications-grid">
@@ -650,51 +816,49 @@
         </div>
       </section>
 
-      <section>
+      <section class="reveal">
         <div class="two-col">
           <div class="text-block">
             <span class="eyebrow">Conclusion</span>
             <h2>The digital divide in the Americas is also an economic divide.</h2>
-            <p>
-              Across the selected countries, higher poverty frequently aligns with lower internet access, larger rural gaps, and greater affordability pressure. That means limited connectivity is not just a technical problem. It is a barrier that can deepen existing inequalities in education, work, healthcare, and public services.
-            </p>
-            <p>
-              The central takeaway of this project is that access should be understood as meaningful access. A connection that is too slow, too expensive, or too unstable does not create the same opportunities as a connection that users can rely on every day. If digital systems are becoming the default path to opportunity, then designing for low-bandwidth and low-income realities is not optional. It is part of designing fairly.
-            </p>
+            <p>Across the selected countries, higher poverty frequently aligns with lower internet access, larger rural gaps, and greater affordability pressure. That means limited connectivity is not just a technical problem. It is a barrier that can deepen existing inequalities in education, work, healthcare, and public services.</p>
+            <p>The central takeaway of this project is that access should be understood as meaningful access. A connection that is too slow, too expensive, or too unstable does not create the same opportunities as a connection that users can rely on every day. If digital systems are becoming the default path to opportunity, then designing for low-bandwidth and low-income realities is not optional. It is part of designing fairly.</p>
           </div>
 
           <div class="viz-card">
             <h3>Key takeaway</h3>
-            <p style="font-size:1.2rem; color:var(--text); line-height:1.5; margin:0;">
-              Poverty does not only limit what people can buy. It can also limit whether people can connect, participate, and benefit from digital life at all.
-            </p>
+            <p style="font-size:1.2rem; color:var(--text); line-height:1.5; margin:0;">Poverty does not only limit what people can buy. It can also limit whether people can connect, participate, and benefit from digital life at all.</p>
           </div>
         </div>
       </section>
-          <section>
+
+      <section class="reveal">
         <span class="eyebrow">References</span>
         <h2>Data sources</h2>
-        <div class="viz-card">
-          <p style="margin:0 0 0.75rem; color:var(--muted);">World Bank – Poverty and Digital Development Indicators</p>
-          <p style="margin:0 0 0.75rem; color:var(--muted);">International Telecommunication Union (ITU) – Internet Usage Statistics</p>
-          <p style="margin:0 0 0.75rem; color:var(--muted);">Alliance for Affordable Internet (A4AI) – Mobile Data Pricing</p>
-          <p style="margin:0; color:var(--muted);">GSMA – Mobile Connectivity and Access Reports</p>
+        <div class="ref-card">
+          <p>World Bank – Poverty and Digital Development Indicators</p>
+          <p>International Telecommunication Union (ITU) – Internet Usage Statistics</p>
+          <p>Alliance for Affordable Internet (A4AI) – Mobile Data Pricing</p>
+          <p>GSMA – Mobile Connectivity and Access Reports</p>
         </div>
       </section>
     </main>
   </div>
 
-  <script>
+  <script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+    import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+
     const povertyCorrelationData = [
-      { country: "Canada", short: "Canada", poverty: 10, internet: 94 },
-      { country: "United States", short: "U.S.", poverty: 12, internet: 93 },
-      { country: "Brazil", short: "Brazil", poverty: 21, internet: 84 },
-      { country: "Dominican Republic", short: "Dom. Rep.", poverty: 23, internet: 75 },
-      { country: "Mexico", short: "Mexico", poverty: 28, internet: 81 },
-      { country: "Peru", short: "Peru", poverty: 30, internet: 71 },
-      { country: "Colombia", short: "Colombia", poverty: 36, internet: 74 },
-      { country: "Honduras", short: "Honduras", poverty: 48, internet: 53 },
-      { country: "Guatemala", short: "Guatemala", poverty: 55, internet: 58 }
+      { country: "Canada", short: "Canada", poverty: 10, internet: 94, cost: 3.7 },
+      { country: "United States", short: "U.S.", poverty: 12, internet: 93, cost: 3.1 },
+      { country: "Brazil", short: "Brazil", poverty: 21, internet: 84, cost: 1.5 },
+      { country: "Dominican Republic", short: "Dom. Rep.", poverty: 23, internet: 75, cost: 2.4 },
+      { country: "Mexico", short: "Mexico", poverty: 28, internet: 81, cost: 2.2 },
+      { country: "Peru", short: "Peru", poverty: 30, internet: 71, cost: 1.9 },
+      { country: "Colombia", short: "Colombia", poverty: 36, internet: 74, cost: 1.8 },
+      { country: "Honduras", short: "Honduras", poverty: 48, internet: 53, cost: 3.0 },
+      { country: "Guatemala", short: "Guatemala", poverty: 55, internet: 58, cost: 2.7 }
     ];
 
     const ruralUrbanData = [
@@ -704,18 +868,6 @@
       { country: "Colombia", urban: 79, rural: 58 },
       { country: "Peru", urban: 78, rural: 49 },
       { country: "Guatemala", urban: 64, rural: 34 }
-    ];
-
-    const dataCostData = [
-      { country: "Canada", cost: 3.7, x: 150, y: 95 },
-      { country: "United States", cost: 3.1, x: 175, y: 145 },
-      { country: "Mexico", cost: 2.2, x: 160, y: 205 },
-      { country: "Guatemala", cost: 2.7, x: 190, y: 240 },
-      { country: "Honduras", cost: 3.0, x: 220, y: 255 },
-      { country: "Dominican Republic", cost: 2.4, x: 290, y: 245 },
-      { country: "Colombia", cost: 1.8, x: 255, y: 320 },
-      { country: "Peru", cost: 1.9, x: 245, y: 390 },
-      { country: "Brazil", cost: 1.5, x: 340, y: 380 }
     ];
 
     const dropoffData = [
@@ -735,7 +887,8 @@
           { task: "Attend online class", seconds: 16 },
           { task: "Book telehealth", seconds: 28 },
           { task: "Submit gov. form", seconds: 22 }
-        ]
+        ],
+        fx: { blur: 0, sat: 1, contrast: 1, shift: 0, static: 0, bars: 0, pixel: 0 }
       },
       {
         speed: "6 Mbps",
@@ -746,7 +899,8 @@
           { task: "Attend online class", seconds: 38 },
           { task: "Book telehealth", seconds: 61 },
           { task: "Submit gov. form", seconds: 45 }
-        ]
+        ],
+        fx: { blur: 0.2, sat: 0.96, contrast: 1.02, shift: 1, static: 0.15, bars: 0.12, pixel: 0 }
       },
       {
         speed: "2 Mbps",
@@ -757,18 +911,20 @@
           { task: "Attend online class", seconds: 112 },
           { task: "Book telehealth", seconds: 135 },
           { task: "Submit gov. form", seconds: 89 }
-        ]
+        ],
+        fx: { blur: 0.55, sat: 0.88, contrast: 1.08, shift: 2.6, static: 0.28, bars: 0.28, pixel: 8 }
       },
       {
         speed: "0.6 Mbps",
         signal: 0.12,
-        caption: "At very weak speeds, some tasks may technically load, but the user experience becomes punishing and failure-prone.",
+        caption: "At very weak speeds, some tasks may technically load, but the experience becomes punishing and failure-prone.",
         tasks: [
           { task: "Apply for a job", seconds: 201 },
           { task: "Attend online class", seconds: 260 },
           { task: "Book telehealth", seconds: 310 },
           { task: "Submit gov. form", seconds: 184 }
-        ]
+        ],
+        fx: { blur: 1.1, sat: 0.72, contrast: 1.14, shift: 4.5, static: 0.46, bars: 0.42, pixel: 14 }
       }
     ];
 
@@ -779,114 +935,124 @@
       { service: "Government", score: 69 }
     ];
 
-    function createRegionChart() {
-      const container = document.getElementById("regionChart");
-      const width = container.clientWidth || 700;
-      const height = 440;
-      const margin = { top: 20, right: 30, bottom: 70, left: 80 };
+    const countryAliases = {
+      "united states of america": "United States",
+      "united states": "United States",
+      "canada": "Canada",
+      "mexico": "Mexico",
+      "guatemala": "Guatemala",
+      "honduras": "Honduras",
+      "dominican republic": "Dominican Republic",
+      "colombia": "Colombia",
+      "peru": "Peru",
+      "brazil": "Brazil"
+    };
 
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+    const datasetByCountry = new Map(povertyCorrelationData.map(d => [d.country, d]));
+    const mapConfig = {
+      poverty: {
+        label: "Poverty rate",
+        accessor: d => d?.poverty,
+        domain: [10, 55],
+        format: v => `${v}%`,
+        colors: ["#6dd3ff", "#ffd166", "#ff7a59"],
+        title: "Estimated poverty rate"
+      },
+      internet: {
+        label: "Internet access",
+        accessor: d => d?.internet,
+        domain: [53, 94],
+        format: v => `${v}%`,
+        colors: ["#ff7a59", "#ffd166", "#6dd3ff"],
+        title: "Internet users"
+      },
+      cost: {
+        label: "Mobile data affordability",
+        accessor: d => d?.cost,
+        domain: [1.5, 3.7],
+        format: v => `$${v.toFixed(1)}`,
+        colors: ["#6dd3ff", "#ffd166", "#ff7a59"],
+        title: "Cost of 1GB mobile data"
+      }
+    };
 
-      const x = d3.scaleLinear()
-        .domain([0, 60])
-        .range([margin.left, width - margin.right]);
+    function normalizeCountryName(properties) {
+      const raw = properties.name || properties.ADMIN || properties.admin || properties.sovereignt || "";
+      const key = raw.toLowerCase().trim();
+      return countryAliases[key] || raw;
+    }
 
-      const y = d3.scaleLinear()
-        .domain([45, 100])
-        .range([height - margin.bottom, margin.top]);
+    async function createRealMap() {
+      const container = document.getElementById("map");
+      const width = container.clientWidth || 780;
+      const height = container.clientHeight || 560;
+      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).ticks(6).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+      const geojson = await d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson");
+      const americas = geojson.features.filter(f => {
+        const c = d3.geoCentroid(f);
+        return c[0] >= -170 && c[0] <= -25 && c[1] >= -60 && c[1] <= 85;
+      });
 
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
+      americas.forEach(f => {
+        f.properties.displayName = normalizeCountryName(f.properties);
+      });
 
-      svg.selectAll(".grid-line-x")
-        .data(x.ticks(6))
+      const fc = { type: "FeatureCollection", features: americas };
+      const projection = d3.geoMercator().fitExtent([[16, 16], [width - 16, height - 16]], fc);
+      const path = d3.geoPath(projection);
+
+      const mapLayer = svg.append("g");
+      const labelLayer = svg.append("g");
+
+      mapLayer.selectAll("path")
+        .data(americas)
         .enter()
-        .append("line")
-        .attr("x1", d => x(d))
-        .attr("x2", d => x(d))
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom)
-        .attr("stroke", "rgba(255,255,255,0.05)")
-        .attr("stroke-dasharray", "4 4");
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "rgba(255,255,255,0.06)")
+        .attr("stroke", "rgba(255,255,255,0.22)")
+        .attr("stroke-width", 0.8)
+        .attr("data-country", d => d.properties.displayName);
 
-      svg.selectAll(".grid-line-y")
-        .data(y.ticks(5))
-        .enter()
-        .append("line")
-        .attr("x1", margin.left)
-        .attr("x2", width - margin.right)
-        .attr("y1", d => y(d))
-        .attr("y2", d => y(d))
-        .attr("stroke", "rgba(255,255,255,0.05)")
-        .attr("stroke-dasharray", "4 4");
-
-      const regression = (() => {
-        const n = povertyCorrelationData.length;
-        const meanX = d3.mean(povertyCorrelationData, d => d.poverty);
-        const meanY = d3.mean(povertyCorrelationData, d => d.internet);
-        const numerator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) * (d.internet - meanY));
-        const denominator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) ** 2);
-        const slope = numerator / denominator;
-        const intercept = meanY - slope * meanX;
-        return {
-          p1: { x: 0, y: intercept },
-          p2: { x: 60, y: intercept + slope * 60 }
-        };
-      })();
-
-      svg.append("line")
-        .attr("x1", x(regression.p1.x))
-        .attr("y1", y(regression.p1.y))
-        .attr("x2", x(regression.p2.x))
-        .attr("y2", y(regression.p2.y))
-        .attr("stroke", "rgba(255,122,89,0.85)")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "6 6");
-
-      svg.selectAll(".dot")
-        .data(povertyCorrelationData)
-        .enter()
-        .append("circle")
-        .attr("cx", d => x(d.poverty))
-        .attr("cy", d => y(d.internet))
-        .attr("r", 7)
-        .attr("fill", "#6dd3ff")
-        .attr("stroke", "rgba(255,255,255,0.7)")
-        .attr("stroke-width", 1.2);
-
-      svg.selectAll(".point-label")
-        .data(povertyCorrelationData)
+      const labelFeatures = americas.filter(f => datasetByCountry.has(f.properties.displayName));
+      labelLayer.selectAll("text")
+        .data(labelFeatures)
         .enter()
         .append("text")
-        .attr("x", d => x(d.poverty) + 10)
-        .attr("y", d => y(d.internet) + 4)
+        .attr("x", d => path.centroid(d)[0])
+        .attr("y", d => path.centroid(d)[1])
+        .attr("text-anchor", "middle")
+        .attr("dy", -10)
         .attr("fill", "#eaf2ff")
         .style("font-size", "11px")
-        .text(d => d.short);
+        .style("paint-order", "stroke")
+        .style("stroke", "rgba(7,16,24,0.9)")
+        .style("stroke-width", 4)
+        .text(d => datasetByCountry.get(d.properties.displayName)?.short || d.properties.displayName);
 
-      svg.append("text")
-        .attr("class", "x-axis-label")
-        .attr("x", width / 2)
-        .attr("y", height - 18)
-        .attr("text-anchor", "middle")
-        .text("Estimated poverty rate (% of population)");
+      function updateMap(viewKey) {
+        const cfg = mapConfig[viewKey];
+        const color = d3.scaleLinear().domain(cfg.domain).range(cfg.colors).interpolate(d3.interpolateRgb);
 
-      svg.append("text")
-        .attr("class", "y-axis-label")
-        .attr("transform", `translate(20, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
-        .text("Internet users (% of population)");
+        d3.select("#mapViewLabel").text(cfg.label);
+        d3.select("#legendTitle").text(cfg.title);
+        d3.select("#legendGradient").style("background", `linear-gradient(90deg, ${cfg.colors.join(",")})`);
+        d3.select("#legendMin").text(cfg.format(cfg.domain[0]));
+        d3.select("#legendMax").text(cfg.format(cfg.domain[1]));
+
+        mapLayer.selectAll("path")
+          .transition()
+          .duration(550)
+          .attr("fill", d => {
+            const row = datasetByCountry.get(d.properties.displayName);
+            const value = cfg.accessor(row);
+            return value == null ? "rgba(255,255,255,0.05)" : color(value);
+          });
+      }
+
+      updateMap("poverty");
+      return updateMap;
     }
 
     function createTrendChart() {
@@ -894,18 +1060,10 @@
       const width = container.clientWidth || 700;
       const height = 400;
       const margin = { top: 20, right: 30, bottom: 60, left: 75 };
+      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
-
-      const x = d3.scaleLinear()
-        .domain([0, 60])
-        .range([margin.left, width - margin.right]);
-
-      const y = d3.scaleLinear()
-        .domain([45, 100])
-        .range([height - margin.bottom, margin.top]);
+      const x = d3.scaleLinear().domain([0, 60]).range([margin.left, width - margin.right]);
+      const y = d3.scaleLinear().domain([45, 100]).range([height - margin.bottom, margin.top]);
 
       svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -957,16 +1115,18 @@
         .text(d => d.short);
 
       svg.append("text")
-        .attr("class", "x-axis-label")
         .attr("x", width / 2)
         .attr("y", height - 16)
         .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
         .text("Estimated poverty rate (% of population)");
 
       svg.append("text")
-        .attr("class", "y-axis-label")
         .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
         .attr("text-anchor", "middle")
+        .attr("fill", "#9fb1c7")
+        .style("font-size", "12px")
         .text("Internet users (% of population)");
     }
 
@@ -975,24 +1135,11 @@
       const width = container.clientWidth || 700;
       const height = 380;
       const margin = { top: 20, right: 20, bottom: 55, left: 55 };
+      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
-
-      const x0 = d3.scaleBand()
-        .domain(ruralUrbanData.map(d => d.country))
-        .range([margin.left, width - margin.right])
-        .padding(0.24);
-
-      const x1 = d3.scaleBand()
-        .domain(["urban", "rural"])
-        .range([0, x0.bandwidth()])
-        .padding(0.16);
-
-      const y = d3.scaleLinear()
-        .domain([0, 100])
-        .range([height - margin.bottom, margin.top]);
+      const x0 = d3.scaleBand().domain(ruralUrbanData.map(d => d.country)).range([margin.left, width - margin.right]).padding(0.24);
+      const x1 = d3.scaleBand().domain(["urban", "rural"]).range([0, x0.bandwidth()]).padding(0.16);
+      const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
 
       svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -1006,137 +1153,9 @@
         .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
         .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
 
-      const groups = svg.selectAll(".country-group")
-        .data(ruralUrbanData)
-        .enter()
-        .append("g")
-        .attr("transform", d => `translate(${x0(d.country)},0)`);
-
-      groups.append("rect")
-        .attr("x", () => x1("urban"))
-        .attr("y", d => y(d.urban))
-        .attr("width", x1.bandwidth())
-        .attr("height", d => y(0) - y(d.urban))
-        .attr("rx", 8)
-        .attr("fill", "#6dd3ff");
-
-      groups.append("rect")
-        .attr("x", () => x1("rural"))
-        .attr("y", d => y(d.rural))
-        .attr("width", x1.bandwidth())
-        .attr("height", d => y(0) - y(d.rural))
-        .attr("rx", 8)
-        .attr("fill", "#ff7a59");
-
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height - 12)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Selected countries in the Americas");
-
-      svg.append("text")
-        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Population with internet access (%)");
-    }
-
-    function createDataCostChart() {
-      const container = document.getElementById("dataCostChart");
-      const width = container.clientWidth || 700;
-      const height = 470;
-
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
-
-      const color = d3.scaleLinear()
-        .domain([1.5, 2.4, 3.7])
-        .range(["#6dd3ff", "#ffd166", "#ff7a59"]);
-
-      svg.append("path")
-        .attr("d", "M130,50 C90,80 85,130 120,170 C135,188 150,205 155,225 C160,245 178,258 198,255 C220,252 235,235 235,215 C236,190 228,168 210,145 C190,120 170,85 130,50 Z")
-        .attr("fill", "rgba(255,255,255,0.04)")
-        .attr("stroke", "rgba(255,255,255,0.12)")
-        .attr("stroke-width", 1.2);
-
-      svg.append("path")
-        .attr("d", "M240,280 C225,310 222,345 230,380 C236,408 250,435 268,448 C286,460 302,448 306,426 C310,405 303,383 316,358 C332,330 360,318 372,292 C382,270 372,245 350,238 C325,230 305,240 286,255 C270,267 252,265 240,280 Z")
-        .attr("fill", "rgba(255,255,255,0.04)")
-        .attr("stroke", "rgba(255,255,255,0.12)")
-        .attr("stroke-width", 1.2);
-
-      svg.append("text")
-        .attr("x", 120)
-        .attr("y", 38)
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("North America");
-
-      svg.append("text")
-        .attr("x", 285)
-        .attr("y", 470 - 22)
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("South America");
-
-      svg.selectAll(".country-node")
-        .data(dataCostData)
-        .enter()
-        .append("circle")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("r", 16)
-        .attr("fill", d => color(d.cost))
-        .attr("stroke", "rgba(255,255,255,0.8)")
-        .attr("stroke-width", 1.4);
-
-      svg.selectAll(".country-label")
-        .data(dataCostData)
-        .enter()
-        .append("text")
-        .attr("x", d => d.x + 22)
-        .attr("y", d => d.y + 4)
-        .attr("fill", "#eaf2ff")
-        .style("font-size", "12px")
-        .text(d => `${d.country} ($${d.cost.toFixed(1)})`);
-
-      const legendX = width - 180;
-      const legendY = 40;
-      const legendData = [
-        { label: "Lower", value: 1.5 },
-        { label: "Mid", value: 2.4 },
-        { label: "Higher", value: 3.7 }
-      ];
-
-      svg.append("text")
-        .attr("x", legendX)
-        .attr("y", legendY - 12)
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Cost of 1GB mobile data");
-
-      svg.selectAll(".legend-dot")
-        .data(legendData)
-        .enter()
-        .append("circle")
-        .attr("cx", legendX)
-        .attr("cy", (_, i) => legendY + i * 24)
-        .attr("r", 7)
-        .attr("fill", d => color(d.value));
-
-      svg.selectAll(".legend-label")
-        .data(legendData)
-        .enter()
-        .append("text")
-        .attr("x", legendX + 16)
-        .attr("y", (_, i) => legendY + i * 24 + 4)
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text(d => d.label);
+      const groups = svg.selectAll(".country-group").data(ruralUrbanData).enter().append("g").attr("transform", d => `translate(${x0(d.country)},0)`);
+      groups.append("rect").attr("x", () => x1("urban")).attr("y", d => y(d.urban)).attr("width", x1.bandwidth()).attr("height", d => y(0) - y(d.urban)).attr("rx", 8).attr("fill", "#6dd3ff");
+      groups.append("rect").attr("x", () => x1("rural")).attr("y", d => y(d.rural)).attr("width", x1.bandwidth()).attr("height", d => y(0) - y(d.rural)).attr("rx", 8).attr("fill", "#ff7a59");
     }
 
     function createDropoffChart() {
@@ -1144,23 +1163,12 @@
       const width = container.clientWidth || 700;
       const height = 360;
       const margin = { top: 20, right: 90, bottom: 50, left: 55 };
-
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
       const keys = ["education", "jobs", "healthcare", "government"];
-      const x = d3.scalePoint()
-        .domain(dropoffData.map(d => d.speed))
-        .range([margin.left, width - margin.right]);
-
-      const y = d3.scaleLinear()
-        .domain([0, 80])
-        .range([height - margin.bottom, margin.top]);
-
-      const color = d3.scaleOrdinal()
-        .domain(keys)
-        .range(["#6dd3ff", "#8bc6ff", "#ff7a59", "#ffd166"]);
+      const x = d3.scalePoint().domain(dropoffData.map(d => d.speed)).range([margin.left, width - margin.right]);
+      const y = d3.scaleLinear().domain([0, 80]).range([height - margin.bottom, margin.top]);
+      const color = d3.scaleOrdinal().domain(keys).range(["#6dd3ff", "#8bc6ff", "#ff7a59", "#ffd166"]);
 
       svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -1175,41 +1183,10 @@
         .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
 
       keys.forEach(key => {
-        const line = d3.line()
-          .x(d => x(d.speed))
-          .y(d => y(d[key]));
-
-        svg.append("path")
-          .datum(dropoffData)
-          .attr("fill", "none")
-          .attr("stroke", color(key))
-          .attr("stroke-width", 3)
-          .attr("d", line);
-
-        svg.selectAll(`.dot-${key}`)
-          .data(dropoffData)
-          .enter()
-          .append("circle")
-          .attr("cx", d => x(d.speed))
-          .attr("cy", d => y(d[key]))
-          .attr("r", 4)
-          .attr("fill", color(key));
+        const line = d3.line().x(d => x(d.speed)).y(d => y(d[key]));
+        svg.append("path").datum(dropoffData).attr("fill", "none").attr("stroke", color(key)).attr("stroke-width", 3).attr("d", line);
+        svg.selectAll(`.dot-${key}`).data(dropoffData).enter().append("circle").attr("cx", d => x(d.speed)).attr("cy", d => y(d[key])).attr("r", 4).attr("fill", color(key));
       });
-
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height - 12)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Connection speed");
-
-      svg.append("text")
-        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Estimated abandonment rate (%)");
     }
 
     function createImpactChart() {
@@ -1217,41 +1194,18 @@
       const width = container.clientWidth || 700;
       const height = 330;
       const margin = { top: 10, right: 20, bottom: 45, left: 120 };
+      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+      const x = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
+      const y = d3.scaleBand().domain(impactData.map(d => d.service)).range([margin.top, height - margin.bottom]).padding(0.25);
 
-      const x = d3.scaleLinear()
-        .domain([0, 100])
-        .range([margin.left, width - margin.right]);
+      svg.selectAll(".row-bg").data(impactData).enter().append("rect")
+        .attr("x", margin.left).attr("y", d => y(d.service)).attr("width", width - margin.left - margin.right)
+        .attr("height", y.bandwidth()).attr("rx", 10).attr("fill", "rgba(255,255,255,0.05)");
 
-      const y = d3.scaleBand()
-        .domain(impactData.map(d => d.service))
-        .range([margin.top, height - margin.bottom])
-        .padding(0.25);
-
-      svg.selectAll(".row-bg")
-        .data(impactData)
-        .enter()
-        .append("rect")
-        .attr("x", margin.left)
-        .attr("y", d => y(d.service))
-        .attr("width", width - margin.left - margin.right)
-        .attr("height", y.bandwidth())
-        .attr("rx", 10)
-        .attr("fill", "rgba(255,255,255,0.05)");
-
-      svg.selectAll(".row-bar")
-        .data(impactData)
-        .enter()
-        .append("rect")
-        .attr("x", margin.left)
-        .attr("y", d => y(d.service))
-        .attr("width", d => x(d.score) - margin.left)
-        .attr("height", y.bandwidth())
-        .attr("rx", 10)
-        .attr("fill", "#ff7a59");
+      svg.selectAll(".row-bar").data(impactData).enter().append("rect")
+        .attr("x", margin.left).attr("y", d => y(d.service)).attr("width", d => x(d.score) - margin.left)
+        .attr("height", y.bandwidth()).attr("rx", 10).attr("fill", "#ff7a59");
 
       svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -1264,206 +1218,152 @@
         .call(d3.axisLeft(y))
         .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
         .call(g => g.selectAll("path, line").remove());
-
-      svg.selectAll(".value")
-        .data(impactData)
-        .enter()
-        .append("text")
-        .attr("x", d => x(d.score) + 8)
-        .attr("y", d => y(d.service) + y.bandwidth() / 2 + 4)
-        .attr("fill", "#eaf2ff")
-        .style("font-size", "12px")
-        .text(d => d.score);
     }
 
     let taskSvg, taskX, taskY, taskHeight, taskWidth, taskMargin;
-
     function createTaskChart() {
       const container = document.getElementById("taskChart");
-      taskWidth = container.clientWidth || 700;
-      taskHeight = 360;
-      taskMargin = { top: 20, right: 30, bottom: 50, left: 135 };
+      taskWidth = container.clientWidth || 620;
+      taskHeight = 340;
+      taskMargin = { top: 20, right: 30, bottom: 44, left: 130 };
+      taskSvg = d3.select(container).append("svg").attr("viewBox", `0 0 ${taskWidth} ${taskHeight}`);
 
-      taskSvg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${taskWidth} ${taskHeight}`);
+      taskX = d3.scaleLinear().domain([0, 330]).range([taskMargin.left, taskWidth - taskMargin.right]);
+      taskY = d3.scaleBand().domain(taskStates[0].tasks.map(d => d.task)).range([taskMargin.top, taskHeight - taskMargin.bottom]).padding(0.28);
 
-      taskX = d3.scaleLinear()
-        .domain([0, 330])
-        .range([taskMargin.left, taskWidth - taskMargin.right]);
-
-      taskY = d3.scaleBand()
-        .domain(taskStates[0].tasks.map(d => d.task))
-        .range([taskMargin.top, taskHeight - taskMargin.bottom])
-        .padding(0.28);
-
-      taskSvg.append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0,${taskHeight - taskMargin.bottom})`)
+      taskSvg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${taskHeight - taskMargin.bottom})`)
         .call(d3.axisBottom(taskX).ticks(5).tickFormat(d => `${d}s`))
         .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
         .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
 
-      taskSvg.append("g")
-        .attr("class", "y-axis")
-        .attr("transform", `translate(${taskMargin.left},0)`)
+      taskSvg.append("g").attr("class", "y-axis").attr("transform", `translate(${taskMargin.left},0)`)
         .call(d3.axisLeft(taskY))
         .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
         .call(g => g.selectAll("path, line").remove());
 
       taskSvg.append("line")
-        .attr("class", "threshold")
-        .attr("x1", taskX(120))
-        .attr("x2", taskX(120))
-        .attr("y1", taskMargin.top)
-        .attr("y2", taskHeight - taskMargin.bottom)
-        .attr("stroke", "#ff7a59")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "6 6");
+        .attr("x1", taskX(120)).attr("x2", taskX(120)).attr("y1", taskMargin.top).attr("y2", taskHeight - taskMargin.bottom)
+        .attr("stroke", "#ff7a59").attr("stroke-width", 2).attr("stroke-dasharray", "6 6");
 
-      taskSvg.append("text")
-        .attr("x", taskX(120) + 8)
-        .attr("y", taskMargin.top - 4)
-        .attr("fill", "#ff7a59")
-        .style("font-size", "12px")
-        .text("high-friction threshold");
-
-      taskSvg.selectAll(".task-bg")
-        .data(taskStates[0].tasks)
-        .enter()
-        .append("rect")
-        .attr("class", "task-bg")
-        .attr("x", taskMargin.left)
-        .attr("y", d => taskY(d.task))
-        .attr("width", taskWidth - taskMargin.left - taskMargin.right)
-        .attr("height", taskY.bandwidth())
-        .attr("rx", 10)
-        .attr("fill", "rgba(255,255,255,0.05)");
-
+      taskSvg.append("text").attr("x", taskX(120) + 8).attr("y", taskMargin.top - 4).attr("fill", "#ff7a59").style("font-size", "12px").text("high-friction threshold");
       taskSvg.append("g").attr("class", "bars");
       taskSvg.append("g").attr("class", "labels");
-
-      updateTaskChart(0);
+      updateTaskChart(0, 0);
     }
 
-    function updateTaskChart(index) {
-      const state = taskStates[index];
-      const bars = taskSvg.select(".bars").selectAll("rect").data(state.tasks, d => d.task);
-      const labels = taskSvg.select(".labels").selectAll("text").data(state.tasks, d => d.task);
+    function randomTear(amount) {
+      const jitter = (Math.random() - 0.5) * amount;
+      return `${jitter.toFixed(2)}px`;
+    }
+
+    function updateTaskChart(index, progress = 0) {
+      const start = taskStates[index];
+      const end = taskStates[Math.min(index + 1, taskStates.length - 1)];
+      const interp = (a, b) => a + (b - a) * progress;
+
+      const tasks = start.tasks.map((t, i) => ({
+        task: t.task,
+        seconds: interp(t.seconds, end.tasks[i].seconds)
+      }));
+
+      const bars = taskSvg.select(".bars").selectAll("rect").data(tasks, d => d.task);
+      const labels = taskSvg.select(".labels").selectAll("text").data(tasks, d => d.task);
 
       bars.join("rect")
         .attr("x", taskMargin.left)
         .attr("y", d => taskY(d.task))
         .attr("height", taskY.bandwidth())
         .attr("rx", 10)
-        .transition()
-        .duration(180)
         .attr("width", d => taskX(d.seconds) - taskMargin.left)
         .attr("fill", d => d.seconds > 120 ? "#ff7a59" : "#6dd3ff");
 
       labels.join("text")
-        .attr("y", d => taskY(d.task) + taskY.bandwidth() / 2 + 4)
-        .transition()
-        .duration(180)
         .attr("x", d => taskX(d.seconds) + 8)
+        .attr("y", d => taskY(d.task) + taskY.bandwidth() / 2 + 4)
         .attr("fill", "#eaf2ff")
         .style("font-size", "12px")
-        .text(d => `${d.seconds}s`);
+        .text(d => `${Math.round(d.seconds)}s`);
 
-      document.getElementById("speedLabel").textContent = state.speed;
-      document.getElementById("taskCaption").textContent = state.caption;
-      document.getElementById("meterFill").style.transform = `scaleX(${state.signal})`;
+      const signal = interp(start.signal, end.signal);
+      document.getElementById("speedLabel").textContent = progress > 0 ? `${(interp(parseFloat(start.speed), parseFloat(end.speed))).toFixed(1)} Mbps` : start.speed;
+      document.getElementById("signalViewLabel").textContent = start.speed;
+      document.getElementById("taskCaption").textContent = start.caption;
+      document.getElementById("meterFill").style.transform = `scaleX(${signal})`;
+
+      const fx = {
+        blur: interp(start.fx.blur, end.fx.blur),
+        sat: interp(start.fx.sat, end.fx.sat),
+        contrast: interp(start.fx.contrast, end.fx.contrast),
+        shift: interp(start.fx.shift, end.fx.shift),
+        static: interp(start.fx.static, end.fx.static),
+        bars: interp(start.fx.bars, end.fx.bars),
+        pixel: interp(start.fx.pixel, end.fx.pixel)
+      };
+
+      const root = document.documentElement;
+      root.style.setProperty("--signal-blur", `${fx.blur}px`);
+      root.style.setProperty("--signal-sat", fx.sat);
+      root.style.setProperty("--signal-contrast", fx.contrast);
+      root.style.setProperty("--signal-shift", randomTear(fx.shift));
+      root.style.setProperty("--signal-static", fx.static);
+      root.style.setProperty("--signal-bars", fx.bars);
+      root.style.setProperty("--signal-pixel", `${fx.pixel}px`);
     }
 
-    function setupScrollEffects() {
-      const section = document.getElementById("bandwidthSection");
-      const pixelOverlay = document.getElementById("pixelOverlay");
-      const glitchOverlay = document.getElementById("glitchOverlay");
-      const globalGlitch = document.getElementById("globalGlitch");
-      const articleLayer = document.getElementById("articleLayer");
-      let sectionScrollTimeout;
-      let globalScrollTimeout;
-
-      const clearSectionEffects = () => {
-        pixelOverlay.style.opacity = 0;
-        glitchOverlay.style.opacity = 0;
-        articleLayer.style.filter = "none";
-        articleLayer.style.transform = "none";
-      };
-
-      const clearGlobalGlitch = () => {
-        globalGlitch.style.opacity = 0;
-        globalGlitch.classList.remove("is-active");
-        globalGlitch.style.transform = "none";
-        const bars = globalGlitch.querySelector('.glitch-bars');
-        const noise = globalGlitch.querySelector('.glitch-noise');
-        if (bars) bars.style.transform = 'none';
-        if (noise) noise.style.backgroundPosition = '0 0';
-      };
-
-      const onScroll = () => {
-        const scrollY = window.scrollY || window.pageYOffset;
-        const speed = Math.min(1, Math.abs((scrollY - (onScroll.lastY || 0))) / 40);
-        onScroll.lastY = scrollY;
-
-        globalGlitch.classList.add("is-active");
-        globalGlitch.style.opacity = (0.28 + speed * 0.28).toFixed(2);
-        globalGlitch.style.transform = `translateX(${(Math.random() - 0.5) * 14 * speed}px)`;
-
-        const bars = globalGlitch.querySelector('.glitch-bars');
-        const noise = globalGlitch.querySelector('.glitch-noise');
-        if (bars) bars.style.transform = `translateX(${(Math.random() - 0.5) * 24 * speed}px)`;
-        if (noise) noise.style.backgroundPosition = `${Math.random() * 26 * speed}px ${Math.random() * 20 * speed}px`;
-
-        clearTimeout(globalScrollTimeout);
-        globalScrollTimeout = setTimeout(() => {
-          clearGlobalGlitch();
-        }, 140);
-
-        const rect = section.getBoundingClientRect();
-        const inSection = rect.top < window.innerHeight && rect.bottom > 0;
-
-        if (!inSection) {
-          clearSectionEffects();
-          return;
-        }
-
-        const total = rect.height - window.innerHeight;
-        const progress = Math.min(1, Math.max(0, -rect.top / Math.max(total, 1)));
-        const clampedIndex = Math.min(taskStates.length - 1, Math.floor(progress * taskStates.length));
-        updateTaskChart(clampedIndex);
-
-        const glitchAmount = Math.max(0, Math.min(1, (progress - 0.05) / 0.95));
-        pixelOverlay.style.opacity = (glitchAmount * 1).toFixed(2);
-        glitchOverlay.style.opacity = (glitchAmount * 0.95).toFixed(2);
-
-        const block = 1 + glitchAmount * 10;
-        pixelOverlay.style.backgroundSize = `${block}px ${block}px`;
-        articleLayer.style.filter = `blur(${glitchAmount * 1.8}px) contrast(${1 + glitchAmount * 0.18}) saturate(${1 - glitchAmount * 0.22})`;
-        articleLayer.style.transform = `translate(${Math.sin(progress * 120) * glitchAmount * 5}px, ${Math.cos(progress * 50) * glitchAmount * 1.5}px)`;
-
-        clearTimeout(sectionScrollTimeout);
-        sectionScrollTimeout = setTimeout(() => {
-          clearSectionEffects();
-        }, 90);
-      };
-
-      window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", onScroll);
-      clearSectionEffects();
-      clearGlobalGlitch();
-      onScroll.lastY = window.scrollY || window.pageYOffset;
-      onScroll();
+    function setupRevealAnimations() {
+      const items = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      items.forEach(item => observer.observe(item));
     }
 
-    createRegionChart();
-    createTrendChart();
-    createRuralUrbanChart();
-    createDataCostChart();
-    createDropoffChart();
-    createImpactChart();
-    createTaskChart();
-    setupScrollEffects();
+    function setupScrollytelling(updateMap) {
+      const mapScroller = scrollama();
+      const bandwidthScroller = scrollama();
+
+      mapScroller
+        .setup({ step: '#mapScrolly .map-step', offset: 0.58, progress: false })
+        .onStepEnter(({ element }) => {
+          document.querySelectorAll('#mapScrolly .map-step').forEach(s => s.classList.remove('is-active'));
+          element.classList.add('is-active');
+          updateMap(element.dataset.view);
+        });
+
+      bandwidthScroller
+        .setup({ step: '#bandwidthScrolly .bw-step', offset: 0.55, progress: true })
+        .onStepEnter(({ element, index }) => {
+          document.querySelectorAll('#bandwidthScrolly .bw-step').forEach(s => s.classList.remove('is-active'));
+          element.classList.add('is-active');
+          updateTaskChart(index, 0);
+        })
+        .onStepProgress(({ index, progress }) => {
+          const clamped = Math.max(0, Math.min(0.999, progress));
+          updateTaskChart(index, clamped);
+        });
+
+      window.addEventListener('resize', () => {
+        mapScroller.resize();
+        bandwidthScroller.resize();
+      });
+    }
+
+    async function init() {
+      const updateMap = await createRealMap();
+      createRuralUrbanChart();
+      createTrendChart();
+      createDropoffChart();
+      createImpactChart();
+      createTaskChart();
+      setupRevealAnimations();
+      setupScrollytelling(updateMap);
+      document.querySelector('#mapScrolly .map-step')?.classList.add('is-active');
+      document.querySelector('#bandwidthScrolly .bw-step')?.classList.add('is-active');
+    }
+
+    init();
   </script>
 </body>
 </html>
