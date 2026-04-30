@@ -1,1369 +1,910 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>When Poverty Limits Connection, Opportunity Shrinks</title>
-  <style>
-    :root {
-      --bg: #071018;
-      --bg-2: #0a1622;
-      --panel: rgba(15, 26, 36, 0.82);
-      --panel-strong: rgba(13, 23, 34, 0.94);
-      --text: #eaf2ff;
-      --muted: #9fb1c7;
-      --accent: #6dd3ff;
-      --accent-2: #ff7a59;
-      --accent-3: #ffd166;
-      --danger: #ff5c8a;
-      --line: rgba(255,255,255,0.08);
-      --shadow: 0 24px 60px rgba(0,0,0,0.28);
-      --max: 1220px;
-      --map-height: 76vh;
-      --signal-blur: 0px;
-      --signal-sat: 1;
-      --signal-contrast: 1;
-      --signal-shift: 0px;
-      --signal-static: 0;
-      --signal-bars: 0;
-      --signal-pixel: 0px;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>When Poverty Limits Connection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Syne:wght@400;500;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080e;
+  --bg2:#080c14;
+  --surface:rgba(12,18,30,0.85);
+  --border:rgba(255,255,255,0.07);
+  --border-bright:rgba(255,255,255,0.13);
+  --text:#e8ecf4;
+  --muted:#7a8ba3;
+  --dim:#3d4f63;
+  --teal:#3ec9c9;
+  --teal-d:#1a8a8a;
+  --rust:#e05c3a;
+  --rust-l:#f07a5a;
+  --gold:#d4a64a;
+  --gold-l:#e8c070;
+  --max:1280px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 20% 0%, rgba(109,211,255,0.1), transparent 24%),
-        radial-gradient(circle at 80% 10%, rgba(255,122,89,0.08), transparent 20%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+/* GRAIN */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px}
 
-    .bg-orb,
-    .bg-orb-2 {
-      position: fixed;
-      border-radius: 999px;
-      filter: blur(80px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.14;
-    }
+/* PROGRESS */
+#prog{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--teal),var(--rust));z-index:500;transition:width .1s linear}
 
-    .bg-orb {
-      width: 280px;
-      height: 280px;
-      background: var(--accent);
-      top: 8%;
-      left: -60px;
-      animation: floatOrb 14s ease-in-out infinite;
-    }
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 2.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid transparent;transition:border-color .3s,backdrop-filter .3s}
+nav.scrolled{border-color:var(--border);backdrop-filter:blur(20px);background:rgba(6,8,14,.7)}
+.nav-mark{font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.nav-mark span{color:var(--teal)}
 
-    .bg-orb-2 {
-      width: 240px;
-      height: 240px;
-      background: var(--accent-2);
-      top: 52%;
-      right: -40px;
-      animation: floatOrb 17s ease-in-out infinite reverse;
-    }
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:7rem 2.5rem 5rem;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero-mesh{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 15% 20%,rgba(62,201,201,.09),transparent),
+             radial-gradient(ellipse 40% 60% at 85% 70%,rgba(224,92,58,.07),transparent),
+             radial-gradient(ellipse 50% 40% at 50% 100%,rgba(212,166,74,.05),transparent)}
+.hero-grid-bg{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:72px 72px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%)}
+.hero-inner{max-width:var(--max);margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr .9fr;gap:4rem;align-items:center}
+.hero-kicker{font-family:'Syne Mono',monospace;font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--teal);margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.hero-kicker::before{content:'';width:32px;height:1px;background:var(--teal)}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,6.5vw,7rem);font-weight:300;line-height:.95;letter-spacing:-.02em;color:var(--text);margin-bottom:2rem}
+h1 em{font-style:italic;color:var(--teal)}
+h1 strong{font-weight:700}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.75;max-width:52ch;margin-bottom:2.5rem}
+.hero-metrics{display:flex;gap:2.5rem}
+.metric{border-left:1px solid var(--border-bright);padding-left:1.2rem}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;line-height:1;color:var(--text)}
+.metric-val em{color:var(--rust);font-style:normal}
+.metric-label{font-size:.75rem;color:var(--muted);letter-spacing:.06em;margin-top:.2rem}
+.hero-right{display:flex;flex-direction:column;gap:1rem}
+.hero-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.4rem;backdrop-filter:blur(12px)}
+.hero-card-tag{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:.6rem}
+.hero-card-val{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:600;line-height:1.1;color:var(--text);margin-bottom:.4rem}
+.hero-card-desc{font-size:.87rem;color:var(--muted);line-height:1.55}
 
-    @keyframes floatOrb {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(18px,-22px) scale(1.06); }
-    }
+/* SCROLL SECTION */
+.scrolly-section{padding:0 2.5rem;position:relative}
+.scrolly-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:.85fr 1.15fr;gap:2rem;align-items:start}
+.scrolly-steps{padding:5rem 0}
+.step{min-height:70vh;display:flex;align-items:center;opacity:.3;transform:translateX(-8px);transition:opacity .35s,transform .35s}
+.step.is-active{opacity:1;transform:translateX(0)}
+.step-inner{width:100%}
+.step-tag{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;display:flex;align-items:center;gap:.7rem}
+.step-tag::before{content:'';width:20px;height:1px;background:var(--teal)}
+.step h2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:400;line-height:1.1;color:var(--text);margin-bottom:1rem;letter-spacing:-.01em}
+.step p{color:var(--muted);font-size:.95rem;line-height:1.75;max-width:46ch}
+.sticky-panel{position:sticky;top:5rem;padding:3rem 0}
+.map-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(12px)}
+.map-card-header{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.map-card-title{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.map-view-badge{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);background:rgba(62,201,201,.1);border:1px solid rgba(62,201,201,.2);padding:.25rem .6rem;border-radius:999px}
+#map{width:100%;height:460px}
 
-    .article-layer {
-      position: relative;
-      z-index: 1;
-    }
+/* MAP LEGEND */
+.map-legend{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:1.5rem}
+.legend-label{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.legend-bar{flex:1;height:6px;border-radius:3px}
+.legend-ends{display:flex;justify-content:space-between;font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--dim);margin-top:.3rem}
 
-    .noise {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-      opacity: 0.035;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.3) 0.55px, transparent 0.8px);
-      background-size: 8px 8px;
-    }
+/* SECTION HEADERS */
+.section-header{max-width:var(--max);margin:0 auto;padding:5rem 2.5rem 3rem}
+.section-tag{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--rust);margin-bottom:.8rem;display:flex;align-items:center;gap:.7rem}
+.section-tag::before{content:'';width:20px;height:1px;background:var(--rust)}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:400;line-height:1.1;letter-spacing:-.01em}
 
-    header.hero {
-      min-height: 100vh;
-      display: grid;
-      align-items: center;
-      padding: 7rem 1.25rem 4rem;
-      border-bottom: 1px solid var(--line);
-    }
+/* DUMBBELL */
+.dumbbell-section{padding:0 2.5rem 6rem}
+.dumbbell-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr 1.3fr;gap:4rem;align-items:center}
+.dumbbell-copy h3{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;line-height:1.2;margin-bottom:1rem;color:var(--text)}
+.dumbbell-copy p{color:var(--muted);font-size:.95rem;line-height:1.75}
+.dumbbell-chart{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.8rem;backdrop-filter:blur(12px)}
+.chart-heading{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem}
 
-    .hero-inner,
-    section {
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-    }
+/* FULL-WIDTH BARRIERS STRIP */
+.barriers-section{padding:0 0 6rem;overflow:hidden}
+.barriers-header{max-width:var(--max);margin:0 auto;padding:0 2.5rem 2rem}
+.barriers-strip{display:flex;gap:1px;background:var(--border)}
+.barrier-tile{flex:1;min-width:220px;background:var(--bg2);padding:2.5rem 2rem;position:relative;overflow:hidden;cursor:default;transition:background .25s}
+.barrier-tile:hover{background:rgba(12,18,30,.95)}
+.barrier-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.barrier-tile:hover::before{transform:scaleX(1)}
+.barrier-num{font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:300;line-height:1;color:rgba(62,201,201,.12);margin-bottom:1.2rem;transition:color .25s}
+.barrier-tile:hover .barrier-num{color:rgba(62,201,201,.25)}
+.barrier-title{font-size:.95rem;font-weight:700;letter-spacing:.04em;margin-bottom:.7rem;color:var(--text)}
+.barrier-desc{font-size:.85rem;color:var(--muted);line-height:1.65}
+.barrier-tag{display:inline-block;margin-top:1.2rem;font-family:'Syne Mono',monospace;font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rust)}
 
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 2rem;
-      align-items: end;
-    }
+/* CHARTS SECTION - alternating */
+.charts-section{padding:0 2.5rem 6rem}
+.charts-inner{max-width:var(--max);margin:0 auto}
+.chart-row{display:grid;gap:2rem;align-items:center;padding:4rem 0;border-top:1px solid var(--border)}
+.chart-row:first-child{border-top:none}
+.chart-row.left{grid-template-columns:1.3fr 1fr}
+.chart-row.right{grid-template-columns:1fr 1.3fr}
+.chart-panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.8rem;backdrop-filter:blur(12px)}
+.chart-copy h3{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:400;line-height:1.15;color:var(--text);margin-bottom:1rem;letter-spacing:-.01em}
+.chart-copy p{color:var(--muted);font-size:.95rem;line-height:1.75}
+.chart-source{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.08em;color:var(--dim);margin-top:1.2rem;line-height:1.6;font-style:normal}
 
-    .eyebrow {
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--accent);
-      padding: 0.45rem 0.72rem;
-      border-radius: 999px;
-      border: 1px solid rgba(109,211,255,0.18);
-      background: rgba(109,211,255,0.06);
-    }
+/* LEGEND DOTS */
+.legend-dots{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.ld{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted)}
+.ld-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-    h1, h2, h3 { line-height: 1.05; margin: 0 0 1rem; }
-    h1 { font-size: clamp(2.4rem, 5.5vw, 5rem); max-width: 11ch; letter-spacing: -0.04em; }
-    h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); letter-spacing: -0.03em; }
-    h3 { font-size: 1.2rem; }
+/* BANDWIDTH SCROLLY */
+.bw-section{padding:0 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,rgba(8,12,20,.95) 100%)}
+.bw-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:.9fr 1.1fr;gap:2rem;align-items:start}
+.bw-steps{padding:5rem 0}
+.bw-step{min-height:65vh;display:flex;align-items:center;opacity:.3;transform:translateX(-8px);transition:opacity .35s,transform .35s}
+.bw-step.is-active{opacity:1;transform:translateX(0)}
+.bw-step-inner h2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,2.5vw,2.3rem);font-weight:400;line-height:1.15;color:var(--text);margin-bottom:.8rem;letter-spacing:-.01em}
+.bw-step-inner p{color:var(--muted);font-size:.92rem;line-height:1.75;max-width:44ch}
+.bw-sticky{position:sticky;top:5rem;padding:3rem 0}
+.bw-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(12px)}
+.bw-card-top{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border)}
+.speed-display{display:flex;align-items:baseline;gap:.5rem}
+.speed-num{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;line-height:1;color:var(--text);transition:color .5s}
+.speed-num.fast{color:var(--teal)}
+.speed-num.mid{color:var(--gold)}
+.speed-num.slow{color:var(--rust)}
+.speed-unit{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--muted);letter-spacing:.08em}
+.signal-meter{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:.8rem;overflow:hidden}
+.signal-fill{height:100%;transition:width .6s cubic-bezier(.16,1,.3,1),background .5s}
+.bw-status{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.5rem}
+.bw-card-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.task-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:1rem;transition:border-color .4s}
+.task-item.over{border-color:rgba(224,92,58,.3)}
+.task-item.under{border-color:rgba(62,201,201,.2)}
+.task-name{font-size:.78rem;color:var(--muted);margin-bottom:.5rem;letter-spacing:.03em}
+.task-bar-wrap{height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin-bottom:.4rem}
+.task-bar{height:100%;border-radius:3px;transition:width .55s cubic-bezier(.16,1,.3,1),background .5s}
+.task-seconds{font-family:'Syne Mono',monospace;font-size:.78rem;transition:color .4s}
+.bw-signal-shell{padding:1.2rem 1.5rem;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.sig-bar{border-radius:3px 3px 0 0;background:var(--teal);transition:height .5s cubic-bezier(.16,1,.3,1),background .5s}
 
-    .lede,
-    .text-block p,
-    .hero-copy p {
-      color: var(--muted);
-      font-size: 1.08rem;
-      max-width: 66ch;
-    }
+/* IMPACT SECTION */
+.impact-section{padding:0 2.5rem 8rem}
+.impact-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.impact-copy h3{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:400;line-height:1.15;color:var(--text);margin-bottom:1rem;letter-spacing:-.01em}
+.impact-copy p{color:var(--muted);font-size:.95rem;line-height:1.75;margin-bottom:1.5rem}
+.quotes-grid{display:grid;gap:.8rem}
+.quote-block{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;border-left:2px solid var(--teal)}
+.quote-block p{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--text);margin-bottom:.5rem;line-height:1.55}
+.quote-block cite{font-family:'Syne Mono',monospace;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-style:normal}
+.arc-panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;backdrop-filter:blur(12px)}
+#arcChart{width:100%;aspect-ratio:1}
 
-    .hero-copy { animation: riseIn 900ms ease both; }
-    .stats { display: grid; gap: 1rem; animation: riseIn 980ms 120ms ease both; }
+/* IMPLICATIONS */
+.implications-section{padding:0 2.5rem 8rem}
+.impl-inner{max-width:var(--max);margin:0 auto}
+.impl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-top:3rem}
+.impl-tile{background:var(--bg2);padding:2rem;transition:background .25s;position:relative}
+.impl-tile:hover{background:rgba(12,18,30,.9)}
+.impl-icon{font-size:1.5rem;margin-bottom:1rem;opacity:.6}
+.impl-title{font-size:.9rem;font-weight:700;letter-spacing:.03em;margin-bottom:.6rem;color:var(--text)}
+.impl-desc{font-size:.83rem;color:var(--muted);line-height:1.65}
 
-    .hero-kicker {
-      display: flex;
-      gap: 0.7rem;
-      flex-wrap: wrap;
-      margin-top: 1.2rem;
-    }
+/* CONCLUSION */
+.conclusion{padding:8rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,rgba(6,8,14,1) 100%);border-top:1px solid var(--border);text-align:center;position:relative;overflow:hidden}
+.conclusion-mesh{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 50% 100%,rgba(62,201,201,.06),transparent)}
+.conclusion-inner{max-width:700px;margin:0 auto;position:relative;z-index:1}
+.conclusion h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,5rem);font-weight:300;line-height:1;letter-spacing:-.02em;color:var(--text);margin-bottom:2rem}
+.conclusion h2 em{color:var(--teal);font-style:italic}
+.conclusion p{color:var(--muted);font-size:1.05rem;line-height:1.8;max-width:55ch;margin:0 auto 2rem}
+.conclusion-rule{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);margin:2.5rem auto}
+.sources{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem;text-align:left;max-width:500px;margin:0 auto}
+.source-item{font-family:'Syne Mono',monospace;font-size:.62rem;letter-spacing:.06em;color:var(--dim);padding-left:.8rem;border-left:1px solid rgba(62,201,201,.2);line-height:1.6}
 
-    .hero-chip {
-      padding: 0.55rem 0.8rem;
-      font-size: 0.86rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
-    }
+/* REVEALS */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.up{opacity:1;transform:translateY(0)}
 
-    .stat-card,
-    .viz-card,
-    .quote-card,
-    .task-card,
-    .ref-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)), var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 1.2rem;
-      backdrop-filter: blur(16px);
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-      transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
-    }
+/* HERO ANIMATE */
+.hero-copy .hero-kicker{animation:fadeUp .6s .1s both}
+.hero-copy h1{animation:fadeUp .7s .2s both}
+.hero-copy .hero-sub{animation:fadeUp .7s .35s both}
+.hero-copy .hero-metrics{animation:fadeUp .7s .45s both}
+.hero-right{animation:fadeUp .8s .3s both}
 
-    .stat-card::before,
-    .viz-card::before,
-    .quote-card::before,
-    .task-card::before,
-    .ref-card::before {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      opacity: 0.6;
-    }
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-    .stat-card:hover,
-    .viz-card:hover,
-    .quote-card:hover,
-    .task-card:hover,
-    .ref-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255,255,255,0.14);
-      box-shadow: 0 28px 70px rgba(0,0,0,0.34);
-    }
+svg{display:block;width:100%}
 
-    .stat-label { color: var(--muted); font-size: 0.92rem; }
-    .stat-value {
-      font-size: clamp(1.9rem, 4vw, 3rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      background: linear-gradient(90deg, #fff, #bfe8ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    main section {
-      padding: 6rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 0.94fr 1.06fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    .sticky-copy {
-      position: sticky;
-      top: 2rem;
-    }
-
-    .scenario-grid,
-    .implications-grid,
-    .quote-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .chart-legend-inline,
-    .legend {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 0.8rem;
-    }
-
-    .chart-legend-inline .dot,
-    .legend i {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 0.45rem;
-      vertical-align: middle;
-    }
-
-    .source-note,
-    .footer-note {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 0.85rem;
-    }
-
-    .task-card span {
-      display: inline-block;
-      margin-top: 0.7rem;
-      font-size: 0.88rem;
-      color: var(--accent);
-    }
-
-    svg { width: 100%; height: auto; display: block; }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 700ms ease, transform 700ms ease;
-    }
-
-    .reveal.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .scrolly {
-      display: grid;
-      grid-template-columns: minmax(260px, 0.82fr) minmax(420px, 1.18fr);
-      gap: 1.5rem;
-      align-items: start;
-    }
-
-    .scrolly-steps { position: relative; z-index: 2; }
-
-    .step {
-      min-height: 62vh;
-      display: flex;
-      align-items: center;
-      opacity: 0.42;
-      transition: opacity 240ms ease, transform 240ms ease;
-    }
-
-    .step.is-active {
-      opacity: 1;
-      transform: translateX(4px);
-    }
-
-    .step-card {
-      width: 100%;
-      background: var(--panel-strong);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 1.15rem;
-      box-shadow: var(--shadow);
-    }
-
-    .step-card p { color: var(--muted); margin: 0; }
-
-    .sticky-graphic {
-      position: sticky;
-      top: 8vh;
-      height: var(--map-height);
-      display: flex;
-      align-items: stretch;
-      z-index: 1;
-    }
-
-    .graphic-card {
-      width: 100%;
-      min-height: 100%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018)), var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 26px;
-      padding: 1rem;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .map-header,
-    .signal-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      align-items: flex-start;
-      margin-bottom: 0.75rem;
-    }
-
-    .map-view-label {
-      color: var(--accent);
-      font-size: 0.86rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .map-wrap,
-    .signal-wrap { position: relative; width: 100%; height: calc(100% - 2.4rem); }
-
-    #map,
-    #signalGraphic { width: 100%; height: 100%; }
-
-    .legend-block {
-      position: absolute;
-      right: 1rem;
-      bottom: 1rem;
-      background: rgba(6, 14, 22, 0.78);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 0.75rem;
-      backdrop-filter: blur(12px);
-      min-width: 170px;
-    }
-
-    .legend-title {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.45rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .legend-gradient {
-      height: 10px;
-      border-radius: 999px;
-      margin-bottom: 0.4rem;
-      background: linear-gradient(90deg, #6dd3ff, #ffd166, #ff7a59);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .legend-scale {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-
-    .signal-shell {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border-radius: 24px;
-      overflow: hidden;
-      background: radial-gradient(circle at top, rgba(109,211,255,0.08), transparent 25%), rgba(8, 15, 24, 0.8);
-      filter: blur(var(--signal-blur)) saturate(var(--signal-sat)) contrast(var(--signal-contrast));
-      transform: translateX(var(--signal-shift));
-      transition: filter 120ms linear, transform 120ms linear;
-    }
-
-    .signal-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(180deg, rgba(255,255,255,calc(var(--signal-static) * 0.13)) 0 1px, transparent 1px 4px),
-        radial-gradient(circle at 30% 20%, rgba(255,255,255,calc(var(--signal-static) * 0.06)), transparent 30%);
-      opacity: 0.8;
-      pointer-events: none;
-    }
-
-    .signal-shell::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        180deg,
-        transparent 0px,
-        transparent 54px,
-        rgba(255,255,255,calc(var(--signal-bars) * 0.12)) 55px,
-        rgba(255,255,255,calc(var(--signal-bars) * 0.12)) 60px,
-        transparent 61px,
-        transparent 120px
-      );
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .pixel-mask {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-      background-size: var(--signal-pixel) var(--signal-pixel);
-      opacity: calc(var(--signal-pixel) / 18);
-      pointer-events: none;
-      mix-blend-mode: screen;
-    }
-
-    .signal-stage {
-      display: grid;
-      grid-template-columns: 0.82fr 1.18fr;
-      gap: 1rem;
-      height: 100%;
-      padding: 1rem;
-    }
-
-    .signal-copy {
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .meter {
-      height: 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      margin: 1rem 0 0.75rem;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .meter-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, var(--danger), var(--accent));
-      transform-origin: left center;
-      transition: transform 120ms linear;
-    }
-
-    .bandwidth-readout {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .signal-chart-wrap {
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-    }
-
-    .ref-card p { color: var(--muted); margin: 0 0 0.75rem; }
-    .ref-card p:last-child { margin-bottom: 0; }
-
-    @keyframes riseIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 980px) {
-      .hero-grid,
-      .two-col,
-      .scrolly,
-      .signal-stage,
-      .scenario-grid,
-      .implications-grid,
-      .quote-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .sticky-copy,
-      .sticky-graphic {
-        position: static;
-      }
-
-      .sticky-graphic {
-        height: 60vh;
-      }
-
-      .step { min-height: auto; margin-bottom: 1rem; }
-      header.hero { min-height: auto; padding-top: 5rem; }
-    }
-  </style>
+@media(max-width:900px){
+  .hero-inner,.scrolly-inner,.dumbbell-inner,.bw-inner,.impact-inner,.impl-grid{grid-template-columns:1fr}
+  .chart-row.left,.chart-row.right{grid-template-columns:1fr}
+  .barriers-strip{flex-direction:column}
+  .sticky-panel,.bw-sticky{position:static;padding:0}
+  .step,.bw-step{min-height:auto;margin-bottom:2rem}
+  nav{padding:.9rem 1.5rem}
+}
+</style>
 </head>
 <body>
-  <div class="noise"></div>
-  <div class="bg-orb"></div>
-  <div class="bg-orb-2"></div>
+<div id="prog"></div>
 
-  <div class="article-layer" id="articleLayer">
-    <header class="hero">
-      <div class="hero-inner hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">Poverty, access, and digital opportunity in the Americas</span>
-          <h1>Lack of Connection Limits Opportunity</h1>
-          <p class="lede">
-            <br>A job application, a telehealth visit, a school portal, or a government form all assume reliable connectivity. Across the Americas, however, internet access depends not only on infrastructure but also on poverty, affordability, and geography. <br><br>This project explores how lower-income conditions often correlate with lower internet access and with that fewer digital opportunities.
-          </p>
+<nav id="nav">
+  <div class="nav-mark"><span>Digital Divide</span> · Americas Report</div>
+  <div class="nav-mark" style="font-size:.65rem">2024 Research</div>
+</nav>
 
-        </div>
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-kicker">Poverty · Access · Opportunity</div>
+      <h1>When <em>Poverty</em><br>Limits <strong>Connection</strong></h1>
+      <p class="hero-sub">A job application, a telehealth visit, a school portal — each assumes reliable connectivity. Across the Americas, access depends not only on infrastructure, but on poverty, affordability, and geography.</p>
+      <div class="hero-metrics">
+        <div class="metric"><div class="metric-val">9</div><div class="metric-label">Countries examined</div></div>
+        <div class="metric"><div class="metric-val">4<em>×</em></div><div class="metric-label">Urban–rural gap</div></div>
+        <div class="metric"><div class="metric-val">71<em>%</em></div><div class="metric-label">Peak abandonment</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="hero-card-tag">Core question</div>
+        <div class="hero-card-val">Poverty ↔ Access</div>
+        <div class="hero-card-desc">How strongly do lower-income conditions in the Americas align with weaker internet access?</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-tag">Project argument</div>
+        <div class="hero-card-val">Access ≠ Equality</div>
+        <div class="hero-card-desc">Even where coverage exists, poverty prevents meaningful internet use through affordability gaps, unstable access, and geography.</div>
+      </div>
+    </div>
+  </div>
+</header>
 
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-label">Core research question</div>
-            <div class="stat-value">Poverty ↔ Access</div>
-            <div class="stat-label">How strongly do lower-income conditions in the Americas align with weaker internet access?</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Project argument</div>
-            <div class="stat-value">Access ≠ equality</div>
-            <div class="stat-label">Even where coverage exists, poverty can still prevent meaningful internet use through affordability, unstable access, and geography.</div>
-          </div>
+<!-- MAP SCROLLY -->
+<section class="scrolly-section reveal">
+  <div style="max-width:var(--max);margin:0 auto;padding:4rem 0 1rem">
+    <div class="section-tag">Access &amp; poverty across the Americas</div>
+    <div class="section-title" style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:400;line-height:1.1;letter-spacing:-.01em;max-width:20ch">Connectivity is not evenly distributed across the hemisphere.</div>
+  </div>
+  <div class="scrolly-inner" id="mapScrolly">
+    <div class="scrolly-steps">
+      <div class="step map-step is-active" data-view="poverty">
+        <div class="step-inner">
+          <div class="step-tag">Poverty rates</div>
+          <h2>Countries with higher poverty cluster toward lower internet adoption.</h2>
+          <p>Poverty shapes digital access in ways infrastructure investment alone cannot fix. The map shows how economic pressure and connectivity deficits overlap across the hemisphere.</p>
         </div>
       </div>
-    </header>
-
-    <main>
-      <section class="reveal">
-        <div class="scrolly" id="mapScrolly">
-          <div class="scrolly-steps">
-            <div class="step map-step" data-view="poverty">
-              <div class="step-card">
-                <span class="eyebrow">Access and poverty across the Americas</span>
-                <h2>Connectivity is not evenly distributed across the hemisphere.</h2>
-                <p>Countries with lower poverty levels tend to report higher internet use, while countries with higher poverty levels often face weaker access and greater dependency on fragile networks.</p>
-              </div>
-            </div>
-            <div class="step map-step" data-view="internet">
-              <div class="step-card">
-                <span class="eyebrow">Internet access</span>
-                <h2>Countries with stronger connectivity cluster differently.</h2>
-                <p>Moving from poverty to internet use makes the contrast clearer: higher access concentrates in fewer places, while lower-access countries are also more exposed to affordability and infrastructure gaps.</p>
-              </div>
-            </div>
-            <div class="step map-step" data-view="cost">
-              <div class="step-card">
-                <span class="eyebrow">Affordability</span>
-                <h2>Coverage alone does not equal meaningful access.</h2>
-                <p>Even where service exists, the cost of mobile data can still block participation. That matters most in places where internet use already overlaps with poverty pressure.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="sticky-graphic">
-            <div class="graphic-card">
-              <div class="map-header">
-                <div>
-                  <h3>Map of the Americas</h3>
-                  <div class="map-view-label" id="mapViewLabel">Poverty rate</div>
-                </div>
-              </div>
-              <div class="map-wrap">
-                <div id="map"></div>
-                <div class="legend-block">
-                  <div class="legend-title" id="legendTitle">Estimated poverty rate</div>
-                  <div class="legend-gradient" id="legendGradient"></div>
-                  <div class="legend-scale">
-                    <span id="legendMin">Low</span>
-                    <span id="legendMax">High</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="step map-step" data-view="internet">
+        <div class="step-inner">
+          <div class="step-tag">Internet access</div>
+          <h2>Stronger connectivity concentrates in fewer, wealthier nations.</h2>
+          <p>Switching to internet usage makes the contrast clear — high access clusters where economic conditions are also stronger, while weaker economies face compounding gaps.</p>
         </div>
-        <p class="source-note">Data compiled from World Bank poverty indicators, International Telecommunication Union (ITU) internet usage statistics, and affordability benchmarks used for the mobile data comparison. The map uses a real GeoJSON country layer of the Americas.</p>
-      </section>
-
-      <section class="reveal">
-        <div class="two-col">
-          <div class="viz-card">
-            <h3>Urban vs. rural internet access</h3>
-            <div id="ruralUrbanChart"></div>
-            <div class="chart-legend-inline">
-              <span><i class="dot" style="background:#6dd3ff"></i>Urban</span>
-              <span><i class="dot" style="background:#ff7a59"></i>Rural</span>
-            </div>
-            <p class="source-note">Urban and rural internet access estimates are based on national statistics and regional reports from the ITU and World Bank Digital Development datasets. Percentages represent approximate shares of the population reporting internet use in urban and rural areas.</p>
-          </div>
-
-          <div class="text-block">
-            <span class="eyebrow">Geography matters</span>
-            <h2>Where you live still shapes what the internet can do for you.</h2>
-            <p>The urban-rural divide is one of the clearest reasons opportunity becomes unequal. In dense cities, a student may stream lectures, upload files, and schedule appointments easily. In rural communities, the same actions may depend on weaker infrastructure, more expensive mobile data, or intermittent service.</p>
-          </div>
+      </div>
+      <div class="step map-step" data-view="cost">
+        <div class="step-inner">
+          <div class="step-tag">Data affordability</div>
+          <h2>Even where service exists, price still excludes.</h2>
+          <p>Mobile data costs relative to income reveal a cruel irony: countries where internet matters most for economic mobility are often the ones where data is least affordable.</p>
         </div>
-      </section>
-
-      <section class="reveal">
-        <span class="eyebrow">Where the barriers show up</span>
-        <h2>Low connectivity is not one problem. It creates many forms of friction.</h2>
-        <div class="scenario-grid">
-          <div class="task-card">
-            <h3>Education</h3>
-            <p>Video lectures stall, LMS uploads fail, and timed quizzes become stressful when a student loses connection.</p>
-            <span>Bandwidth + stability dependency</span>
-          </div>
-          <div class="task-card">
-            <h3>Jobs</h3>
-            <p>Resume uploads, online assessments, and live interviews become higher-risk tasks for low-bandwidth users.</p>
-            <span>Deadlines + drop-off risk</span>
-          </div>
-          <div class="task-card">
-            <h3>Healthcare</h3>
-            <p>Patient portals, telehealth video, and imaging downloads become harder when data is expensive or unreliable.</p>
-            <span>Care quality + continuity</span>
-          </div>
-          <div class="task-card">
-            <h3>Government services</h3>
-            <p>Benefit forms, identity checks, and appointment systems can lock people out when pages time out or fail to load.</p>
-            <span>System trust + access</span>
-          </div>
+      </div>
+    </div>
+    <div class="sticky-panel">
+      <div class="map-card">
+        <div class="map-card-header">
+          <span class="map-card-title">Americas</span>
+          <span class="map-view-badge" id="mapBadge">Poverty rate</span>
         </div>
-        <p class="source-note">Examples of digital barriers are synthesized from reports on digital inclusion, remote education access, telehealth adoption, and online job recruitment trends across the Americas.</p>
-      </section>
-
-      <section class="reveal">
-        <div class="two-col">
-          <div class="viz-card">
-            <h3>Poverty vs. internet access scatter plot with trend line</h3>
-            <div id="trendChart"></div>
-            <div class="chart-legend-inline">
-              <span><i class="dot" style="background:#6dd3ff"></i>Country observation</span>
-              <span><i class="dot" style="background:#ff7a59"></i>Trend line</span>
-            </div>
-            <p class="source-note">Data compiled from World Bank poverty indicators and International Telecommunication Union (ITU) internet usage statistics. The dashed line shows the overall relationship across the selected countries.</p>
+        <div id="map"></div>
+        <div class="map-legend">
+          <span class="legend-label" id="legendMin" style="min-width:40px">Low</span>
+          <div style="flex:1">
+            <div class="legend-bar" id="legendBar"></div>
+            <div class="legend-ends"><span id="legendL">10%</span><span id="legendR">55%</span></div>
           </div>
-
-          <div class="text-block">
-            <span class="eyebrow">Correlation pattern</span>
-            <h2>As poverty rises, internet access tends to fall.</h2>
-            <p>The scatter plot makes the project’s central argument more explicit. It does not prove that poverty alone determines internet use, but it does show a clear downward relationship across the selected countries. In other words, economic inequality often overlaps with digital inequality.</p>
-          </div>
+          <span class="legend-label" id="legendMax" style="min-width:40px;text-align:right">High</span>
         </div>
-      </section>
-
-      <section class="reveal">
-        <div class="two-col">
-          <div class="viz-card">
-            <h3>Estimated task abandonment under weaker connectivity</h3>
-            <div id="dropoffChart"></div>
-            <div class="chart-legend-inline">
-              <span><i class="dot" style="background:#6dd3ff"></i>Education</span>
-              <span><i class="dot" style="background:#8bc6ff"></i>Jobs</span>
-              <span><i class="dot" style="background:#ff7a59"></i>Healthcare</span>
-              <span><i class="dot" style="background:#ffd166"></i>Government</span>
-            </div>
-            <p class="source-note">Estimated abandonment rates are modeled based on research linking slower internet speeds with increased page load times and user drop-off behavior in digital services. The visualization represents a conceptual scenario derived from UX performance research rather than a single dataset.</p>
-          </div>
-
-          <div class="text-block">
-            <span class="eyebrow">Compounding friction</span>
-            <h2>Slow connectivity creates drop-off long before a task is technically impossible.</h2>
-            <p>People often do not wait until a page fully fails. They leave when the process becomes too slow, too expensive, or too uncertain. That makes abandonment part of the opportunity story: systems can exclude users even when they still technically load.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="reveal">
-        <div class="scrolly" id="bandwidthScrolly">
-          <div class="scrolly-steps">
-            <div class="step bw-step" data-index="0">
-              <div class="step-card">
-                <span class="eyebrow">Scroll to simulate signal loss</span>
-                <h2>As the connection weakens, ordinary tasks become exhausting.</h2>
-                <p>At stronger speeds, common digital tasks remain usable. Heavy tasks still take time, but users can usually finish them.</p>
-              </div>
-            </div>
-            <div class="step bw-step" data-index="1">
-              <div class="step-card">
-                <span class="eyebrow">Moderate instability</span>
-                <h2>Delay becomes friction before it becomes failure.</h2>
-                <p>Once speeds drop, uploads, live sessions, and telehealth portals begin to feel unreliable. The system technically works, but the experience becomes fragile.</p>
-              </div>
-            </div>
-            <div class="step bw-step" data-index="2">
-              <div class="step-card">
-                <span class="eyebrow">Weak connection</span>
-                <h2>Uncertainty changes behavior.</h2>
-                <p>At low speeds, people stop trusting the flow. Repeated waiting, retries, and partial loads push them toward abandonment.</p>
-              </div>
-            </div>
-            <div class="step bw-step" data-index="3">
-              <div class="step-card">
-                <span class="eyebrow">Signal collapse</span>
-                <h2>Eventually the task itself starts to break apart.</h2>
-                <p>Very weak or unstable connections create a harsher form of exclusion: the interaction becomes cognitively exhausting, visually unstable, and easy to abandon.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="sticky-graphic">
-            <div class="graphic-card">
-              <div class="signal-header">
-                <div>
-                  <h3>Signal-loss simulation</h3>
-                  <div class="map-view-label" id="signalViewLabel">15 Mbps</div>
-                </div>
-              </div>
-              <div class="signal-wrap">
-                <div class="signal-shell" id="signalShell">
-                  <div class="pixel-mask"></div>
-                  <div class="signal-stage">
-                    <div class="signal-copy">
-                      <p class="lede" style="font-size:1rem; max-width:40ch;">Scroll to see how lower bandwidth affects visually and make task completion slower.</p>
-                      <div class="meter">
-                        <div class="meter-fill" id="meterFill"></div>
-                      </div>
-                      <div class="bandwidth-readout">
-                        <span>Signal strength</span>
-                        <strong id="speedLabel">15 Mbps</strong>
-                      </div>
-                      <p class="footer-note" id="taskCaption">Under stronger access, common digital tasks remain usable. Under weaker access, the same actions become slow or fail entirely.</p>
-                    </div>
-                    <div class="signal-chart-wrap">
-                      <div id="taskChart"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="legend-block">
-                  <div class="legend-title">Task outcome</div>
-                  <div class="legend"><span><i style="background:#6dd3ff"></i>Below high-friction threshold</span><span><i style="background:#ff7a59"></i>Exceeds high-friction threshold</span></div>
-                </div>
-              </div>
-              <p class="source-note">The bandwidth simulation models approximate wait times under different connection speeds, including unstable mobile and low-bandwidth conditions. The values illustrate typical delays reported in performance testing studies and are intended to demonstrate how connectivity conditions affect user experience.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="reveal">
-        <div class="two-col">
-          <div class="viz-card">
-            <h3>Opportunity loss score by service type</h3>
-            <div id="impactChart"></div>
-            <p class="source-note">This score is a designed synthesis for storytelling, built from the project’s argument that delays, drop-offs, and cost burden compound exclusion across essential services.</p>
-          </div>
-
-          <div class="text-block">
-            <span class="eyebrow">Consequences</span>
-            <h2>Missed access becomes missed opportunity.</h2>
-            <p>When a product assumes fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.</p>
-            <div class="quote-grid">
-              <div class="quote-card">
-                <p>“I can open the form on my phone, but uploading the documents takes so long that I usually give up.”</p>
-                <strong>Composite scenario: government service user</strong>
-              </div>
-              <div class="quote-card">
-                <p>“When the video freezes in class, I miss the explanation and the rest of the lesson stops making sense.”</p>
-                <strong>Composite scenario: student</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="reveal">
-        <span class="eyebrow">Design implications</span>
-        <h2>If poverty and connectivity reinforce each other, inclusive design must respond to both.</h2>
-        <div class="implications-grid">
-          <div class="task-card">
-            <h3>Design for interruption</h3>
-            <p>Save progress automatically, support retries, and avoid forcing users to restart long forms.</p>
-          </div>
-          <div class="task-card">
-            <h3>Reduce media weight</h3>
-            <p>Use lightweight interfaces, compressed assets, and low-bandwidth modes for essential flows.</p>
-          </div>
-          <div class="task-card">
-            <h3>Support mobile-first realities</h3>
-            <p>Many users are not desktop users on bad internet. They are mobile-only users on expensive data plans.</p>
-          </div>
-          <div class="task-card">
-            <h3>Measure exclusion</h3>
-            <p>Track failures, load time abandonment, and retry rates by bandwidth condition—not only average conversion.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="reveal">
-        <div class="two-col">
-          <div class="text-block">
-            <span class="eyebrow">Conclusion</span>
-            <h2>The digital divide in the Americas is also an economic divide.</h2>
-            <p>Across the selected countries, higher poverty frequently aligns with lower internet access, larger rural gaps, and greater affordability pressure. That means limited connectivity is not just a technical problem. It is a barrier that can deepen existing inequalities in education, work, healthcare, and public services.</p>
-            <p>The central takeaway of this project is that access should be understood as meaningful access. A connection that is too slow, too expensive, or too unstable does not create the same opportunities as a connection that users can rely on every day. If digital systems are becoming the default path to opportunity, then designing for low-bandwidth and low-income realities is not optional. It is part of designing fairly.</p>
-          </div>
-
-          <div class="viz-card">
-            <h3>Key takeaway</h3>
-            <p style="font-size:1.2rem; color:var(--text); line-height:1.5; margin:0;">Poverty does not only limit what people can buy. It can also limit whether people can connect, participate, and benefit from digital life at all.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="reveal">
-        <span class="eyebrow">References</span>
-        <h2>Data sources</h2>
-        <div class="ref-card">
-          <p>World Bank – Poverty and Digital Development Indicators</p>
-          <p>International Telecommunication Union (ITU) – Internet Usage Statistics</p>
-          <p>Alliance for Affordable Internet (A4AI) – Mobile Data Pricing</p>
-          <p>GSMA – Mobile Connectivity and Access Reports</p>
-        </div>
-      </section>
-    </main>
+      </div>
+    </div>
   </div>
-
-  <script type="module">
-    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-    import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
-
-    const povertyCorrelationData = [
-      { country: "Canada", short: "Canada", poverty: 10, internet: 94, cost: 3.7 },
-      { country: "United States", short: "U.S.", poverty: 12, internet: 93, cost: 3.1 },
-      { country: "Brazil", short: "Brazil", poverty: 21, internet: 84, cost: 1.5 },
-      { country: "Dominican Republic", short: "Dom. Rep.", poverty: 23, internet: 75, cost: 2.4 },
-      { country: "Mexico", short: "Mexico", poverty: 28, internet: 81, cost: 2.2 },
-      { country: "Peru", short: "Peru", poverty: 30, internet: 71, cost: 1.9 },
-      { country: "Colombia", short: "Colombia", poverty: 36, internet: 74, cost: 1.8 },
-      { country: "Honduras", short: "Honduras", poverty: 48, internet: 53, cost: 3.0 },
-      { country: "Guatemala", short: "Guatemala", poverty: 55, internet: 58, cost: 2.7 }
-    ];
-
-    const ruralUrbanData = [
-      { country: "United States", urban: 92, rural: 79 },
-      { country: "Mexico", urban: 83, rural: 62 },
-      { country: "Brazil", urban: 88, rural: 72 },
-      { country: "Colombia", urban: 79, rural: 58 },
-      { country: "Peru", urban: 78, rural: 49 },
-      { country: "Guatemala", urban: 64, rural: 34 }
-    ];
-
-    const dropoffData = [
-      { speed: "15 Mbps", education: 6, jobs: 8, healthcare: 10, government: 7 },
-      { speed: "6 Mbps", education: 14, jobs: 19, healthcare: 23, government: 17 },
-      { speed: "2 Mbps", education: 31, jobs: 37, healthcare: 42, government: 35 },
-      { speed: "0.6 Mbps", education: 57, jobs: 63, healthcare: 71, government: 59 }
-    ];
-
-    const taskStates = [
-      {
-        speed: "15 Mbps",
-        signal: 1,
-        caption: "At stronger speeds, all four tasks remain possible, though heavier services still take time.",
-        tasks: [
-          { task: "Apply for a job", seconds: 24 },
-          { task: "Attend online class", seconds: 16 },
-          { task: "Book telehealth", seconds: 28 },
-          { task: "Submit gov. form", seconds: 22 }
-        ],
-        fx: { blur: 0, sat: 1, contrast: 1, shift: 0, static: 0, bars: 0, pixel: 0 }
-      },
-      {
-        speed: "6 Mbps",
-        signal: 0.7,
-        caption: "At moderate speeds, delays grow. Uploads and video-based services start to feel fragile.",
-        tasks: [
-          { task: "Apply for a job", seconds: 49 },
-          { task: "Attend online class", seconds: 38 },
-          { task: "Book telehealth", seconds: 61 },
-          { task: "Submit gov. form", seconds: 45 }
-        ],
-        fx: { blur: 0.2, sat: 0.96, contrast: 1.02, shift: 1, static: 0.15, bars: 0.12, pixel: 0 }
-      },
-      {
-        speed: "2 Mbps",
-        signal: 0.38,
-        caption: "At weak speeds, wait times become disruptive. Multi-step tasks become harder to finish.",
-        tasks: [
-          { task: "Apply for a job", seconds: 96 },
-          { task: "Attend online class", seconds: 112 },
-          { task: "Book telehealth", seconds: 135 },
-          { task: "Submit gov. form", seconds: 89 }
-        ],
-        fx: { blur: 0.55, sat: 0.88, contrast: 1.08, shift: 2.6, static: 0.28, bars: 0.28, pixel: 8 }
-      },
-      {
-        speed: "0.6 Mbps",
-        signal: 0.12,
-        caption: "At very weak speeds, some tasks may technically load, but the experience becomes punishing and failure-prone.",
-        tasks: [
-          { task: "Apply for a job", seconds: 201 },
-          { task: "Attend online class", seconds: 260 },
-          { task: "Book telehealth", seconds: 310 },
-          { task: "Submit gov. form", seconds: 184 }
-        ],
-        fx: { blur: 1.1, sat: 0.72, contrast: 1.14, shift: 4.5, static: 0.46, bars: 0.42, pixel: 14 }
-      }
-    ];
-
-    const impactData = [
-      { service: "Healthcare", score: 86 },
-      { service: "Education", score: 81 },
-      { service: "Jobs", score: 74 },
-      { service: "Government", score: 69 }
-    ];
-
-    const countryAliases = {
-      "united states of america": "United States",
-      "united states": "United States",
-      "canada": "Canada",
-      "mexico": "Mexico",
-      "guatemala": "Guatemala",
-      "honduras": "Honduras",
-      "dominican republic": "Dominican Republic",
-      "colombia": "Colombia",
-      "peru": "Peru",
-      "brazil": "Brazil"
-    };
-
-    const datasetByCountry = new Map(povertyCorrelationData.map(d => [d.country, d]));
-    const mapConfig = {
-      poverty: {
-        label: "Poverty rate",
-        accessor: d => d?.poverty,
-        domain: [10, 55],
-        format: v => `${v}%`,
-        colors: ["#6dd3ff", "#ffd166", "#ff7a59"],
-        title: "Estimated poverty rate"
-      },
-      internet: {
-        label: "Internet access",
-        accessor: d => d?.internet,
-        domain: [53, 94],
-        format: v => `${v}%`,
-        colors: ["#ff7a59", "#ffd166", "#6dd3ff"],
-        title: "Internet users"
-      },
-      cost: {
-        label: "Mobile data affordability",
-        accessor: d => d?.cost,
-        domain: [1.5, 3.7],
-        format: v => `$${v.toFixed(1)}`,
-        colors: ["#6dd3ff", "#ffd166", "#ff7a59"],
-        title: "Cost of 1GB mobile data"
-      }
-    };
-
-    function normalizeCountryName(properties) {
-      const raw = properties.name || properties.ADMIN || properties.admin || properties.sovereignt || "";
-      const key = raw.toLowerCase().trim();
-      return countryAliases[key] || raw;
-    }
-
-    async function createRealMap() {
-      const container = document.getElementById("map");
-      const width = container.clientWidth || 780;
-      const height = container.clientHeight || 560;
-      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-      const geojson = await d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson");
-      const americas = geojson.features.filter(f => {
-        const c = d3.geoCentroid(f);
-        return c[0] >= -170 && c[0] <= -25 && c[1] >= -60 && c[1] <= 85;
-      });
-
-      americas.forEach(f => {
-        f.properties.displayName = normalizeCountryName(f.properties);
-      });
-
-      const fc = { type: "FeatureCollection", features: americas };
-      const projection = d3.geoMercator().fitExtent([[16, 16], [width - 16, height - 16]], fc);
-      const path = d3.geoPath(projection);
-
-      const mapLayer = svg.append("g");
-      const labelLayer = svg.append("g");
-
-      mapLayer.selectAll("path")
-        .data(americas)
-        .enter()
-        .append("path")
-        .attr("d", path)
-        .attr("fill", "rgba(255,255,255,0.06)")
-        .attr("stroke", "rgba(255,255,255,0.22)")
-        .attr("stroke-width", 0.8)
-        .attr("data-country", d => d.properties.displayName);
-
-      const labelFeatures = americas.filter(f => datasetByCountry.has(f.properties.displayName));
-      labelLayer.selectAll("text")
-        .data(labelFeatures)
-        .enter()
-        .append("text")
-        .attr("x", d => path.centroid(d)[0])
-        .attr("y", d => path.centroid(d)[1])
-        .attr("text-anchor", "middle")
-        .attr("dy", -10)
-        .attr("fill", "#eaf2ff")
-        .style("font-size", "11px")
-        .style("paint-order", "stroke")
-        .style("stroke", "rgba(7,16,24,0.9)")
-        .style("stroke-width", 4)
-        .text(d => datasetByCountry.get(d.properties.displayName)?.short || d.properties.displayName);
-
-      function updateMap(viewKey) {
-        const cfg = mapConfig[viewKey];
-        const color = d3.scaleLinear().domain(cfg.domain).range(cfg.colors).interpolate(d3.interpolateRgb);
-
-        d3.select("#mapViewLabel").text(cfg.label);
-        d3.select("#legendTitle").text(cfg.title);
-        d3.select("#legendGradient").style("background", `linear-gradient(90deg, ${cfg.colors.join(",")})`);
-        d3.select("#legendMin").text(cfg.format(cfg.domain[0]));
-        d3.select("#legendMax").text(cfg.format(cfg.domain[1]));
-
-        mapLayer.selectAll("path")
-          .transition()
-          .duration(550)
-          .attr("fill", d => {
-            const row = datasetByCountry.get(d.properties.displayName);
-            const value = cfg.accessor(row);
-            return value == null ? "rgba(255,255,255,0.05)" : color(value);
-          });
-      }
-
-      updateMap("poverty");
-      return updateMap;
-    }
-
-    function createTrendChart() {
-      const container = document.getElementById("trendChart");
-      const width = container.clientWidth || 700;
-      const height = 400;
-      const margin = { top: 20, right: 30, bottom: 60, left: 75 };
-      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-      const x = d3.scaleLinear().domain([0, 60]).range([margin.left, width - margin.right]);
-      const y = d3.scaleLinear().domain([45, 100]).range([height - margin.bottom, margin.top]);
-
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).ticks(6).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      const meanX = d3.mean(povertyCorrelationData, d => d.poverty);
-      const meanY = d3.mean(povertyCorrelationData, d => d.internet);
-      const numerator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) * (d.internet - meanY));
-      const denominator = d3.sum(povertyCorrelationData, d => (d.poverty - meanX) ** 2);
-      const slope = numerator / denominator;
-      const intercept = meanY - slope * meanX;
-
-      svg.append("line")
-        .attr("x1", x(0))
-        .attr("y1", y(intercept))
-        .attr("x2", x(60))
-        .attr("y2", y(intercept + slope * 60))
-        .attr("stroke", "#ff7a59")
-        .attr("stroke-width", 2.5)
-        .attr("stroke-dasharray", "7 6");
-
-      svg.selectAll(".trend-dot")
-        .data(povertyCorrelationData)
-        .enter()
-        .append("circle")
-        .attr("cx", d => x(d.poverty))
-        .attr("cy", d => y(d.internet))
-        .attr("r", 6)
-        .attr("fill", "#6dd3ff")
-        .attr("stroke", "rgba(255,255,255,0.7)")
-        .attr("stroke-width", 1.2);
-
-      svg.selectAll(".trend-label")
-        .data(povertyCorrelationData)
-        .enter()
-        .append("text")
-        .attr("x", d => x(d.poverty) + 8)
-        .attr("y", d => y(d.internet) - 8)
-        .attr("fill", "#eaf2ff")
-        .style("font-size", "11px")
-        .text(d => d.short);
-
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height - 16)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Estimated poverty rate (% of population)");
-
-      svg.append("text")
-        .attr("transform", `translate(18, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#9fb1c7")
-        .style("font-size", "12px")
-        .text("Internet users (% of population)");
-    }
-
-    function createRuralUrbanChart() {
-      const container = document.getElementById("ruralUrbanChart");
-      const width = container.clientWidth || 700;
-      const height = 380;
-      const margin = { top: 20, right: 20, bottom: 55, left: 55 };
-      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-      const x0 = d3.scaleBand().domain(ruralUrbanData.map(d => d.country)).range([margin.left, width - margin.right]).padding(0.24);
-      const x1 = d3.scaleBand().domain(["urban", "rural"]).range([0, x0.bandwidth()]).padding(0.16);
-      const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
-
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x0))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7").style("font-size", "12px"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      const groups = svg.selectAll(".country-group").data(ruralUrbanData).enter().append("g").attr("transform", d => `translate(${x0(d.country)},0)`);
-      groups.append("rect").attr("x", () => x1("urban")).attr("y", d => y(d.urban)).attr("width", x1.bandwidth()).attr("height", d => y(0) - y(d.urban)).attr("rx", 8).attr("fill", "#6dd3ff");
-      groups.append("rect").attr("x", () => x1("rural")).attr("y", d => y(d.rural)).attr("width", x1.bandwidth()).attr("height", d => y(0) - y(d.rural)).attr("rx", 8).attr("fill", "#ff7a59");
-    }
-
-    function createDropoffChart() {
-      const container = document.getElementById("dropoffChart");
-      const width = container.clientWidth || 700;
-      const height = 360;
-      const margin = { top: 20, right: 90, bottom: 50, left: 55 };
-      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-      const keys = ["education", "jobs", "healthcare", "government"];
-      const x = d3.scalePoint().domain(dropoffData.map(d => d.speed)).range([margin.left, width - margin.right]);
-      const y = d3.scaleLinear().domain([0, 80]).range([height - margin.bottom, margin.top]);
-      const color = d3.scaleOrdinal().domain(keys).range(["#6dd3ff", "#8bc6ff", "#ff7a59", "#ffd166"]);
-
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      keys.forEach(key => {
-        const line = d3.line().x(d => x(d.speed)).y(d => y(d[key]));
-        svg.append("path").datum(dropoffData).attr("fill", "none").attr("stroke", color(key)).attr("stroke-width", 3).attr("d", line);
-        svg.selectAll(`.dot-${key}`).data(dropoffData).enter().append("circle").attr("cx", d => x(d.speed)).attr("cy", d => y(d[key])).attr("r", 4).attr("fill", color(key));
-      });
-    }
-
-    function createImpactChart() {
-      const container = document.getElementById("impactChart");
-      const width = container.clientWidth || 700;
-      const height = 330;
-      const margin = { top: 10, right: 20, bottom: 45, left: 120 };
-      const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-      const x = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
-      const y = d3.scaleBand().domain(impactData.map(d => d.service)).range([margin.top, height - margin.bottom]).padding(0.25);
-
-      svg.selectAll(".row-bg").data(impactData).enter().append("rect")
-        .attr("x", margin.left).attr("y", d => y(d.service)).attr("width", width - margin.left - margin.right)
-        .attr("height", y.bandwidth()).attr("rx", 10).attr("fill", "rgba(255,255,255,0.05)");
-
-      svg.selectAll(".row-bar").data(impactData).enter().append("rect")
-        .attr("x", margin.left).attr("y", d => y(d.service)).attr("width", d => x(d.score) - margin.left)
-        .attr("height", y.bandwidth()).attr("rx", 10).attr("fill", "#ff7a59");
-
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).ticks(5))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y))
-        .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
-        .call(g => g.selectAll("path, line").remove());
-    }
-
-    let taskSvg, taskX, taskY, taskHeight, taskWidth, taskMargin;
-    function createTaskChart() {
-      const container = document.getElementById("taskChart");
-      taskWidth = container.clientWidth || 620;
-      taskHeight = 340;
-      taskMargin = { top: 20, right: 30, bottom: 44, left: 130 };
-      taskSvg = d3.select(container).append("svg").attr("viewBox", `0 0 ${taskWidth} ${taskHeight}`);
-
-      taskX = d3.scaleLinear().domain([0, 330]).range([taskMargin.left, taskWidth - taskMargin.right]);
-      taskY = d3.scaleBand().domain(taskStates[0].tasks.map(d => d.task)).range([taskMargin.top, taskHeight - taskMargin.bottom]).padding(0.28);
-
-      taskSvg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${taskHeight - taskMargin.bottom})`)
-        .call(d3.axisBottom(taskX).ticks(5).tickFormat(d => `${d}s`))
-        .call(g => g.selectAll("text").attr("fill", "#9fb1c7"))
-        .call(g => g.selectAll("path, line").attr("stroke", "rgba(255,255,255,0.18)"));
-
-      taskSvg.append("g").attr("class", "y-axis").attr("transform", `translate(${taskMargin.left},0)`)
-        .call(d3.axisLeft(taskY))
-        .call(g => g.selectAll("text").attr("fill", "#eaf2ff"))
-        .call(g => g.selectAll("path, line").remove());
-
-      taskSvg.append("line")
-        .attr("x1", taskX(120)).attr("x2", taskX(120)).attr("y1", taskMargin.top).attr("y2", taskHeight - taskMargin.bottom)
-        .attr("stroke", "#ff7a59").attr("stroke-width", 2).attr("stroke-dasharray", "6 6");
-
-      taskSvg.append("text").attr("x", taskX(120) + 8).attr("y", taskMargin.top - 4).attr("fill", "#ff7a59").style("font-size", "12px").text("high-friction threshold");
-      taskSvg.append("g").attr("class", "bars");
-      taskSvg.append("g").attr("class", "labels");
-      updateTaskChart(0, 0);
-    }
-
-    function randomTear(amount) {
-      const jitter = (Math.random() - 0.5) * amount;
-      return `${jitter.toFixed(2)}px`;
-    }
-
-    function updateTaskChart(index, progress = 0) {
-      const start = taskStates[index];
-      const end = taskStates[Math.min(index + 1, taskStates.length - 1)];
-      const interp = (a, b) => a + (b - a) * progress;
-
-      const tasks = start.tasks.map((t, i) => ({
-        task: t.task,
-        seconds: interp(t.seconds, end.tasks[i].seconds)
-      }));
-
-      const bars = taskSvg.select(".bars").selectAll("rect").data(tasks, d => d.task);
-      const labels = taskSvg.select(".labels").selectAll("text").data(tasks, d => d.task);
-
-      bars.join("rect")
-        .attr("x", taskMargin.left)
-        .attr("y", d => taskY(d.task))
-        .attr("height", taskY.bandwidth())
-        .attr("rx", 10)
-        .attr("width", d => taskX(d.seconds) - taskMargin.left)
-        .attr("fill", d => d.seconds > 120 ? "#ff7a59" : "#6dd3ff");
-
-      labels.join("text")
-        .attr("x", d => taskX(d.seconds) + 8)
-        .attr("y", d => taskY(d.task) + taskY.bandwidth() / 2 + 4)
-        .attr("fill", "#eaf2ff")
-        .style("font-size", "12px")
-        .text(d => `${Math.round(d.seconds)}s`);
-
-      const signal = interp(start.signal, end.signal);
-      document.getElementById("speedLabel").textContent = progress > 0 ? `${(interp(parseFloat(start.speed), parseFloat(end.speed))).toFixed(1)} Mbps` : start.speed;
-      document.getElementById("signalViewLabel").textContent = start.speed;
-      document.getElementById("taskCaption").textContent = start.caption;
-      document.getElementById("meterFill").style.transform = `scaleX(${signal})`;
-
-      const fx = {
-        blur: interp(start.fx.blur, end.fx.blur),
-        sat: interp(start.fx.sat, end.fx.sat),
-        contrast: interp(start.fx.contrast, end.fx.contrast),
-        shift: interp(start.fx.shift, end.fx.shift),
-        static: interp(start.fx.static, end.fx.static),
-        bars: interp(start.fx.bars, end.fx.bars),
-        pixel: interp(start.fx.pixel, end.fx.pixel)
-      };
-
-      const root = document.documentElement;
-      root.style.setProperty("--signal-blur", `${fx.blur}px`);
-      root.style.setProperty("--signal-sat", fx.sat);
-      root.style.setProperty("--signal-contrast", fx.contrast);
-      root.style.setProperty("--signal-shift", randomTear(fx.shift));
-      root.style.setProperty("--signal-static", fx.static);
-      root.style.setProperty("--signal-bars", fx.bars);
-      root.style.setProperty("--signal-pixel", `${fx.pixel}px`);
-    }
-
-    function setupRevealAnimations() {
-      const items = document.querySelectorAll('.reveal');
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('is-visible');
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      items.forEach(item => observer.observe(item));
-    }
-
-    function setupScrollytelling(updateMap) {
-      const mapScroller = scrollama();
-      const bandwidthScroller = scrollama();
-
-      mapScroller
-        .setup({ step: '#mapScrolly .map-step', offset: 0.58, progress: false })
-        .onStepEnter(({ element }) => {
-          document.querySelectorAll('#mapScrolly .map-step').forEach(s => s.classList.remove('is-active'));
-          element.classList.add('is-active');
-          updateMap(element.dataset.view);
-        });
-
-      bandwidthScroller
-        .setup({ step: '#bandwidthScrolly .bw-step', offset: 0.55, progress: true })
-        .onStepEnter(({ element, index }) => {
-          document.querySelectorAll('#bandwidthScrolly .bw-step').forEach(s => s.classList.remove('is-active'));
-          element.classList.add('is-active');
-          updateTaskChart(index, 0);
-        })
-        .onStepProgress(({ index, progress }) => {
-          const clamped = Math.max(0, Math.min(0.999, progress));
-          updateTaskChart(index, clamped);
-        });
-
-      window.addEventListener('resize', () => {
-        mapScroller.resize();
-        bandwidthScroller.resize();
-      });
-    }
-
-    async function init() {
-      const updateMap = await createRealMap();
-      createRuralUrbanChart();
-      createTrendChart();
-      createDropoffChart();
-      createImpactChart();
-      createTaskChart();
-      setupRevealAnimations();
-      setupScrollytelling(updateMap);
-      document.querySelector('#mapScrolly .map-step')?.classList.add('is-active');
-      document.querySelector('#bandwidthScrolly .bw-step')?.classList.add('is-active');
-    }
-
-    init();
-  </script>
+</section>
+
+<!-- DUMBBELL - Urban vs Rural -->
+<div class="section-header reveal">
+  <div class="section-tag">Geography matters</div>
+  <div class="section-title">Where you live shapes<br><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--teal)">what the internet can do.</em></div>
+</div>
+<section class="dumbbell-section reveal">
+  <div class="dumbbell-inner">
+    <div class="dumbbell-copy">
+      <h3>The urban–rural divide is one of the clearest expressions of unequal opportunity.</h3>
+      <p style="margin-bottom:1rem">In dense cities, a student may stream lectures and schedule appointments easily. In rural communities, the same actions depend on weaker infrastructure, more expensive data, or intermittent service.</p>
+      <p>The connected dot chart to the right shows each country's gap between urban and rural access — not just the numbers, but the <em>distance</em> between them.</p>
+      <div class="legend-dots" style="margin-top:2rem">
+        <div class="ld"><div class="ld-dot" style="background:var(--teal)"></div>Urban access</div>
+        <div class="ld"><div class="ld-dot" style="background:var(--rust)"></div>Rural access</div>
+        <div class="ld"><div class="ld-dot" style="background:rgba(255,255,255,.15)"></div>Gap</div>
+      </div>
+    </div>
+    <div class="dumbbell-chart reveal">
+      <div class="chart-heading">Urban vs. rural internet access — % of population online</div>
+      <div id="dumbbellChart"></div>
+      <p class="chart-source">ITU &amp; World Bank Digital Development datasets. Approximate shares of population reporting internet use.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BARRIERS STRIP -->
+<div class="section-header reveal">
+  <div class="section-tag">Where barriers emerge</div>
+  <div class="section-title">Low connectivity is not one problem.<br>It creates many forms of friction.</div>
+</div>
+<section class="barriers-section">
+  <div class="barriers-strip reveal">
+    <div class="barrier-tile">
+      <div class="barrier-num">01</div>
+      <div class="barrier-title">Education</div>
+      <div class="barrier-desc">Video lectures stall, LMS uploads fail, and timed quizzes become stressful when a student loses connection mid-session.</div>
+      <span class="barrier-tag">Bandwidth + stability</span>
+    </div>
+    <div class="barrier-tile">
+      <div class="barrier-num">02</div>
+      <div class="barrier-title">Employment</div>
+      <div class="barrier-desc">Resume uploads, online assessments, and live interviews become higher-risk tasks for low-bandwidth users facing hard deadlines.</div>
+      <span class="barrier-tag">Deadlines + drop-off risk</span>
+    </div>
+    <div class="barrier-tile">
+      <div class="barrier-num">03</div>
+      <div class="barrier-title">Healthcare</div>
+      <div class="barrier-desc">Patient portals, telehealth video, and imaging downloads become harder when data is expensive or unreliable.</div>
+      <span class="barrier-tag">Care quality + continuity</span>
+    </div>
+    <div class="barrier-tile">
+      <div class="barrier-num">04</div>
+      <div class="barrier-title">Government</div>
+      <div class="barrier-desc">Benefit forms, identity checks, and appointment systems lock people out when pages time out or fail to load.</div>
+      <span class="barrier-tag">Trust + access</span>
+    </div>
+  </div>
+</section>
+
+<!-- SCATTER + AREA CHARTS -->
+<div class="section-header reveal">
+  <div class="section-tag">Correlation &amp; consequence</div>
+  <div class="section-title">As poverty rises,<br><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rust)">access tends to fall.</em></div>
+</div>
+<section class="charts-section">
+  <div class="charts-inner">
+    <div class="chart-row left reveal">
+      <div class="chart-panel">
+        <div class="chart-heading">Poverty rate vs. internet adoption — scatter with trend</div>
+        <div id="scatterChart"></div>
+        <div class="legend-dots" style="margin-top:1rem">
+          <div class="ld"><div class="ld-dot" style="background:var(--teal)"></div>Country</div>
+          <div class="ld"><div class="ld-dot" style="background:var(--rust);border-radius:0;width:16px;height:2px"></div>Trend line</div>
+        </div>
+        <p class="chart-source">World Bank poverty indicators × ITU internet usage statistics.</p>
+      </div>
+      <div class="chart-copy" style="padding:2rem 0">
+        <h3>The relationship is consistent across the hemisphere.</h3>
+        <p>This is not proof that poverty alone determines internet use — but it shows a clear downward relationship. Economic inequality and digital inequality frequently overlap in the same communities.</p>
+      </div>
+    </div>
+    <div class="chart-row right reveal">
+      <div class="chart-copy" style="padding:2rem 0">
+        <h3>Users don't wait for failure. They leave before it arrives.</h3>
+        <p>People abandon tasks when the process becomes too slow or uncertain — before the page actually fails. The area chart shows abandonment compounding across speeds, with healthcare and education suffering most.</p>
+        <div class="legend-dots" style="margin-top:1.5rem">
+          <div class="ld"><div class="ld-dot" style="background:var(--teal)"></div>Education</div>
+          <div class="ld"><div class="ld-dot" style="background:var(--teal-d)"></div>Jobs</div>
+          <div class="ld"><div class="ld-dot" style="background:var(--rust)"></div>Healthcare</div>
+          <div class="ld"><div class="ld-dot" style="background:var(--gold)"></div>Government</div>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-heading">Estimated task abandonment by connection speed — area chart</div>
+        <div id="areaChart"></div>
+        <p class="chart-source">Modeled from research linking slower speeds with user drop-off in digital services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BANDWIDTH SCROLLY -->
+<div class="section-header reveal" style="background:linear-gradient(180deg,var(--bg) 0%,rgba(8,12,20,.95) 100%)">
+  <div class="section-tag">Signal loss simulation</div>
+  <div class="section-title">As connection weakens,<br><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rust)">ordinary tasks become exhausting.</em></div>
+</div>
+<section class="bw-section reveal">
+  <div class="bw-inner" id="bwScrolly">
+    <div class="bw-steps">
+      <div class="bw-step is-active" data-index="0">
+        <div class="bw-step-inner">
+          <div class="step-tag">Strong signal · 15 Mbps</div>
+          <h2>At full speed, all four tasks remain usable.</h2>
+          <p>Heavy services take time, but users can complete them. The experience is predictable and manageable.</p>
+        </div>
+      </div>
+      <div class="bw-step" data-index="1">
+        <div class="bw-step-inner">
+          <div class="step-tag">Moderate · 6 Mbps</div>
+          <h2>Delay becomes friction before it becomes failure.</h2>
+          <p>Uploads and live sessions start to feel unreliable. The system technically works, but trust begins to erode.</p>
+        </div>
+      </div>
+      <div class="bw-step" data-index="2">
+        <div class="bw-step-inner">
+          <div class="step-tag">Weak · 2 Mbps</div>
+          <h2>Uncertainty starts changing behavior.</h2>
+          <p>People stop trusting the flow. Repeated waits and partial loads push them toward giving up entirely.</p>
+        </div>
+      </div>
+      <div class="bw-step" data-index="3">
+        <div class="bw-step-inner">
+          <div class="step-tag">Critical · 0.6 Mbps</div>
+          <h2>The interaction itself starts to break apart.</h2>
+          <p>Very weak connections make access cognitively exhausting. The task can technically complete — but the user has already left.</p>
+        </div>
+      </div>
+    </div>
+    <div class="bw-sticky">
+      <div class="bw-card">
+        <div class="bw-card-top">
+          <div class="speed-display">
+            <span class="speed-num fast" id="speedNum">15</span>
+            <span class="speed-unit">Mbps</span>
+          </div>
+          <div class="signal-meter"><div class="signal-fill" id="sigFill" style="width:100%;background:var(--teal)"></div></div>
+          <div class="bw-status" id="bwStatus">Strong signal — all tasks usable</div>
+        </div>
+        <div class="bw-card-body" id="taskItems"></div>
+        <div class="bw-signal-shell" id="sigBars"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT + QUOTES -->
+<div class="section-header reveal">
+  <div class="section-tag">Consequences</div>
+  <div class="section-title">Missed access becomes<br><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rust)">missed opportunity.</em></div>
+</div>
+<section class="impact-section reveal">
+  <div class="impact-inner">
+    <div class="impact-copy">
+      <h3>The same user may fail a class upload, miss a telehealth slot, and abandon a job application in the same week.</h3>
+      <p>When digital systems assume fast internet, users with constrained access pay with time, money, missed deadlines, and emotional stress. These costs compound.</p>
+      <div class="quotes-grid">
+        <div class="quote-block">
+          <p>"I can open the form on my phone, but uploading documents takes so long I usually give up."</p>
+          <cite>Composite scenario: government service user</cite>
+        </div>
+        <div class="quote-block">
+          <p>"When the video freezes in class, I miss the explanation and the rest of the lesson stops making sense."</p>
+          <cite>Composite scenario: student</cite>
+        </div>
+      </div>
+    </div>
+    <div class="arc-panel">
+      <div class="chart-heading">Opportunity loss score by service type — radial</div>
+      <div id="arcChart"></div>
+      <p class="chart-source">Synthesis built from the argument that delays, drop-offs, and cost burden compound exclusion across services.</p>
+    </div>
+  </div>
+</section>
+
+<!-- IMPLICATIONS -->
+<div class="section-header reveal">
+  <div class="section-tag">Design implications</div>
+  <div class="section-title">Inclusive design must<br>respond to both poverty<br><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--teal)">and connectivity.</em></div>
+</div>
+<section class="implications-section reveal">
+  <div class="impl-inner">
+    <div class="impl-grid">
+      <div class="impl-tile">
+        <div class="impl-icon">↩</div>
+        <div class="impl-title">Design for interruption</div>
+        <div class="impl-desc">Save progress automatically. Support retries. Never force users to restart a long form because of a dropped connection.</div>
+      </div>
+      <div class="impl-tile">
+        <div class="impl-icon">⬇</div>
+        <div class="impl-title">Reduce media weight</div>
+        <div class="impl-desc">Lightweight interfaces, compressed assets, and low-bandwidth modes for every essential flow — not as afterthoughts.</div>
+      </div>
+      <div class="impl-tile">
+        <div class="impl-icon">📱</div>
+        <div class="impl-title">Mobile-first realities</div>
+        <div class="impl-desc">Many users are not desktop users on bad internet. They are mobile-only users on expensive, metered data plans.</div>
+      </div>
+      <div class="impl-tile">
+        <div class="impl-icon">◎</div>
+        <div class="impl-title">Measure exclusion</div>
+        <div class="impl-desc">Track abandonment, retry rates, and failure points by bandwidth condition — not only average conversion metrics.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<footer class="conclusion">
+  <div class="conclusion-mesh"></div>
+  <div class="conclusion-inner reveal">
+    <div class="section-tag" style="justify-content:center">Conclusion</div>
+    <h2>The digital divide is also an <em>economic</em> divide.</h2>
+    <p>A connection that is too slow, too expensive, or too unstable does not create the same opportunities as one that can be relied on every day. Designing for low-bandwidth, low-income realities is not optional.</p>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-style:italic;color:var(--teal)">It is part of designing fairly.</p>
+    <div class="conclusion-rule"></div>
+    <div class="sources">
+      <div class="source-item">World Bank — Poverty &amp; Digital Development Indicators</div>
+      <div class="source-item">Alliance for Affordable Internet (A4AI) — Pricing Data</div>
+      <div class="source-item">International Telecommunication Union (ITU)</div>
+      <div class="source-item">GSMA — Mobile Connectivity Reports</div>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import*as d3 from"https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import scrollama from"https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+
+// DATA
+const pov=[
+  {c:"Canada",s:"CA",poverty:10,internet:94,cost:3.7},
+  {c:"United States",s:"US",poverty:12,internet:93,cost:3.1},
+  {c:"Brazil",s:"BR",poverty:21,internet:84,cost:1.5},
+  {c:"Dominican Republic",s:"DO",poverty:23,internet:75,cost:2.4},
+  {c:"Mexico",s:"MX",poverty:28,internet:81,cost:2.2},
+  {c:"Peru",s:"PE",poverty:30,internet:71,cost:1.9},
+  {c:"Colombia",s:"CO",poverty:36,internet:74,cost:1.8},
+  {c:"Honduras",s:"HN",poverty:48,internet:53,cost:3.0},
+  {c:"Guatemala",s:"GT",poverty:55,internet:58,cost:2.7}
+];
+const rural=[
+  {c:"United States",urban:92,rural:79},
+  {c:"Mexico",urban:83,rural:62},
+  {c:"Brazil",urban:88,rural:72},
+  {c:"Colombia",urban:79,rural:58},
+  {c:"Peru",urban:78,rural:49},
+  {c:"Guatemala",urban:64,rural:34}
+];
+const dropoff=[
+  {speed:"15 Mbps",education:6,jobs:8,healthcare:10,government:7},
+  {speed:"6 Mbps",education:14,jobs:19,healthcare:23,government:17},
+  {speed:"2 Mbps",education:31,jobs:37,healthcare:42,government:35},
+  {speed:"0.6 Mbps",education:57,jobs:63,healthcare:71,government:59}
+];
+const impact=[
+  {s:"Healthcare",v:86},{s:"Education",v:81},{s:"Employment",v:74},{s:"Government",v:69}
+];
+const taskStates=[
+  {speed:"15",signal:1,status:"Strong signal — all tasks usable",color:"var(--teal)",
+   tasks:[{n:"Job application",s:24},{n:"Online class",s:16},{n:"Telehealth",s:28},{n:"Gov. form",s:22}]},
+  {speed:"6",signal:.67,status:"Moderate signal — delays growing",color:"var(--teal)",
+   tasks:[{n:"Job application",s:49},{n:"Online class",s:38},{n:"Telehealth",s:61},{n:"Gov. form",s:45}]},
+  {speed:"2",signal:.33,status:"Weak signal — tasks becoming disruptive",color:"var(--gold)",
+   tasks:[{n:"Job application",s:96},{n:"Online class",s:112},{n:"Telehealth",s:135},{n:"Gov. form",s:89}]},
+  {speed:"0.6",signal:.08,status:"Critical — punishing and failure-prone",color:"var(--rust)",
+   tasks:[{n:"Job application",s:201},{n:"Online class",s:260},{n:"Telehealth",s:310},{n:"Gov. form",s:184}]}
+];
+const aliases={
+  "united states of america":"United States","united states":"United States",
+  "canada":"Canada","mexico":"Mexico","guatemala":"Guatemala","honduras":"Honduras",
+  "dominican republic":"Dominican Republic","colombia":"Colombia","peru":"Peru","brazil":"Brazil"
+};
+const byCountry=new Map(pov.map(d=>[d.c,d]));
+
+// TOOLTIP
+let tipEl=document.createElement('div');
+tipEl.style.cssText='position:fixed;background:#0a0f1a;color:#e8ecf4;font-family:"Syne Mono",monospace;font-size:.72rem;padding:.5rem .9rem;border-radius:8px;pointer-events:none;z-index:300;opacity:0;transition:opacity .15s;border:1px solid rgba(62,201,201,.2);white-space:nowrap;letter-spacing:.04em';
+document.body.appendChild(tipEl);
+function tip(e,html){tipEl.innerHTML=html;tipEl.style.opacity=1;tipEl.style.left=(e.clientX+14)+'px';tipEl.style.top=(e.clientY-10)+'px'}
+function untip(){tipEl.style.opacity=0}
+document.addEventListener('mousemove',e=>{if(tipEl.style.opacity=='1'){tipEl.style.left=(e.clientX+14)+'px';tipEl.style.top=(e.clientY-10)+'px'}});
+
+// PROGRESS BAR
+const prog=document.getElementById('prog');
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  const t=document.documentElement.scrollHeight-window.innerHeight;
+  prog.style.width=(window.scrollY/t*100)+'%';
+  nav.classList.toggle('scrolled',window.scrollY>60);
+},{passive:true});
+
+// REVEAL
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('up')});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+// MAP
+const mapCfg={
+  poverty:{label:"Poverty rate",acc:d=>d?.poverty,domain:[10,55],fmt:v=>v+'%',colors:["#3ec9c9","#d4a64a","#e05c3a"],l:"10%",r:"55%"},
+  internet:{label:"Internet access",acc:d=>d?.internet,domain:[53,94],fmt:v=>v+'%',colors:["#e05c3a","#d4a64a","#3ec9c9"],l:"53%",r:"94%"},
+  cost:{label:"Data cost (1GB)",acc:d=>d?.cost,domain:[1.5,3.7],fmt:v=>'$'+v.toFixed(1),colors:["#3ec9c9","#d4a64a","#e05c3a"],l:"$1.50",r:"$3.70"}
+};
+
+async function buildMap(){
+  const wrap=document.getElementById('map');
+  const W=wrap.clientWidth||700,H=460;
+  const svg=d3.select(wrap).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const geo=await d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson");
+  const americas=geo.features.filter(f=>{const c=d3.geoCentroid(f);return c[0]>=-170&&c[0]<=-25&&c[1]>=-60&&c[1]<=85});
+  americas.forEach(f=>{const raw=(f.properties.name||'').toLowerCase().trim();f.properties.dn=aliases[raw]||f.properties.name});
+  const fc={type:"FeatureCollection",features:americas};
+  const proj=d3.geoMercator().fitExtent([[12,12],[W-12,H-12]],fc);
+  const path=d3.geoPath(proj);
+  const layer=svg.append('g');
+  layer.selectAll('path').data(americas).enter().append('path')
+    .attr('d',path).attr('fill','rgba(62,201,201,.04)').attr('stroke','rgba(62,201,201,.18)').attr('stroke-width',.7)
+    .attr('data-dn',d=>d.properties.dn).attr('cursor','pointer')
+    .on('mousemove',(e,d)=>{const row=byCountry.get(d.properties.dn);if(row)tip(e,`<strong>${row.c}</strong><br/>Poverty: ${row.poverty}%&nbsp;&nbsp;Internet: ${row.internet}%`)})
+    .on('mouseleave',untip);
+  svg.append('g').selectAll('text').data(americas.filter(f=>byCountry.has(f.properties.dn))).enter().append('text')
+    .attr('x',d=>path.centroid(d)[0]).attr('y',d=>path.centroid(d)[1]+4)
+    .attr('text-anchor','middle').attr('fill','rgba(232,236,244,.7)').style('font-family','Syne Mono,monospace').style('font-size','9px')
+    .style('paint-order','stroke').style('stroke','rgba(6,8,14,.9)').style('stroke-width',3)
+    .text(d=>byCountry.get(d.properties.dn)?.s||'');
+
+  function updateMap(key){
+    const cfg=mapCfg[key];
+    const color=d3.scaleLinear().domain(cfg.domain).range(cfg.colors);
+    layer.selectAll('path').transition().duration(500)
+      .attr('fill',d=>{const row=byCountry.get(d.properties.dn);const v=cfg.acc(row);return v==null?'rgba(62,201,201,.04)':color(v)});
+    document.getElementById('mapBadge').textContent=cfg.label;
+    document.getElementById('legendBar').style.background=`linear-gradient(90deg,${cfg.colors.join(',')})`;
+    document.getElementById('legendL').textContent=cfg.l;
+    document.getElementById('legendR').textContent=cfg.r;
+  }
+  updateMap('poverty');
+  return updateMap;
+}
+
+// DUMBBELL
+function buildDumbbell(){
+  const wrap=document.getElementById('dumbbellChart');
+  const W=wrap.clientWidth||580,H=280,m={top:10,right:20,bottom:30,left:100};
+  const svg=d3.select(wrap).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const x=d3.scaleLinear().domain([25,100]).range([m.left,W-m.right]);
+  const y=d3.scaleBand().domain(rural.map(d=>d.c)).range([m.top,H-m.bottom]).padding(.45);
+  // Grid
+  svg.append('g').call(d3.axisBottom(x).ticks(5).tickFormat(d=>d+'%')).attr('transform',`translate(0,${H-m.bottom})`)
+    .call(g=>g.selectAll('text').style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63'))
+    .call(g=>g.selectAll('path,line').attr('stroke','rgba(255,255,255,.05)'));
+  svg.append('g').call(d3.axisLeft(y).tickSize(0)).attr('transform',`translate(${m.left},0)`)
+    .call(g=>g.select('.domain').remove())
+    .selectAll('text').style('font-family','Syne,sans-serif').style('font-size','10px').attr('fill','#7a8ba3');
+  // Connecting lines (gaps)
+  rural.forEach(d=>{
+    const yc=y(d.c)+y.bandwidth()/2;
+    svg.append('line').attr('x1',x(d.rural)).attr('x2',x(d.urban)).attr('y1',yc).attr('y2',yc)
+      .attr('stroke','rgba(255,255,255,.1)').attr('stroke-width',3).attr('stroke-linecap','round');
+  });
+  // Rural dots (animate in)
+  rural.forEach(d=>{
+    const yc=y(d.c)+y.bandwidth()/2;
+    svg.append('circle').attr('cx',x(d.rural)).attr('cy',yc).attr('r',0).attr('fill','#e05c3a')
+      .attr('cursor','pointer')
+      .on('mousemove',e=>tip(e,`${d.c} Rural: ${d.rural}%`)).on('mouseleave',untip)
+      .transition().delay(200).duration(500).ease(d3.easeBounceOut).attr('r',7);
+    svg.append('circle').attr('cx',x(d.urban)).attr('cy',yc).attr('r',0).attr('fill','#3ec9c9')
+      .attr('cursor','pointer')
+      .on('mousemove',e=>tip(e,`${d.c} Urban: ${d.urban}%`)).on('mouseleave',untip)
+      .transition().delay(300).duration(500).ease(d3.easeBounceOut).attr('r',7);
+    // Gap label
+    const mid=x((d.urban+d.rural)/2);
+    svg.append('text').attr('x',mid).attr('y',yc-11).attr('text-anchor','middle')
+      .style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','rgba(255,255,255,.25)')
+      .text(`+${d.urban-d.rural}pp`);
+  });
+}
+
+// SCATTER
+function buildScatter(){
+  const wrap=document.getElementById('scatterChart');
+  const W=wrap.clientWidth||560,H=340,m={top:20,right:20,bottom:50,left:52};
+  const svg=d3.select(wrap).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const x=d3.scaleLinear().domain([0,62]).range([m.left,W-m.right]);
+  const y=d3.scaleLinear().domain([45,100]).range([H-m.bottom,m.top]);
+  // Grid
+  svg.append('g').attr('transform',`translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.left-m.right)).tickFormat(''))
+    .call(g=>g.selectAll('line').attr('stroke','rgba(255,255,255,.04)').attr('stroke-dasharray','3 3'))
+    .call(g=>g.select('.domain').remove());
+  // Axes
+  svg.append('g').attr('transform',`translate(0,${H-m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(d=>d+'%'))
+    .call(g=>g.selectAll('text').style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63'))
+    .call(g=>g.selectAll('path,line').attr('stroke','rgba(255,255,255,.06)'));
+  svg.append('g').attr('transform',`translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%'))
+    .call(g=>g.selectAll('text').style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63'))
+    .call(g=>g.selectAll('path,line').attr('stroke','rgba(255,255,255,.06)'));
+  // Regression
+  const mx=d3.mean(pov,d=>d.poverty),my=d3.mean(pov,d=>d.internet);
+  const num=d3.sum(pov,d=>(d.poverty-mx)*(d.internet-my)),den=d3.sum(pov,d=>(d.poverty-mx)**2);
+  const sl=num/den,ic=my-sl*mx;
+  svg.append('line').attr('x1',x(0)).attr('y1',y(ic)).attr('x2',x(62)).attr('y2',y(ic+sl*62))
+    .attr('stroke','rgba(224,92,58,.6)').attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  // Dots
+  const dots=svg.selectAll('g.d').data(pov).enter().append('g').attr('class','d');
+  dots.append('circle').attr('cx',d=>x(d.poverty)).attr('cy',d=>y(d.internet)).attr('r',0)
+    .attr('fill','#3ec9c9').attr('stroke','rgba(62,201,201,.3)').attr('stroke-width',6).attr('cursor','pointer')
+    .on('mousemove',(e,d)=>tip(e,`<strong>${d.c}</strong><br/>Poverty: ${d.poverty}%  Internet: ${d.internet}%`))
+    .on('mouseleave',untip)
+    .transition().delay((_,i)=>i*70).duration(400).ease(d3.easeBounceOut).attr('r',6);
+  dots.append('text').attr('x',d=>x(d.poverty)+9).attr('y',d=>y(d.internet)+4)
+    .style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','rgba(232,236,244,.5)').text(d=>d.s)
+    .attr('opacity',0).transition().delay((_,i)=>i*70+200).duration(300).attr('opacity',1);
+  svg.append('text').attr('x',W/2).attr('y',H-6).attr('text-anchor','middle')
+    .style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63').text('Estimated poverty rate (%)');
+}
+
+// AREA CHART
+function buildArea(){
+  const wrap=document.getElementById('areaChart');
+  const W=wrap.clientWidth||560,H=300,m={top:20,right:20,bottom:50,left:45};
+  const svg=d3.select(wrap).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const keys=['education','jobs','healthcare','government'];
+  const colors=['#3ec9c9','#1a8a8a','#e05c3a','#d4a64a'];
+  const x=d3.scalePoint().domain(dropoff.map(d=>d.speed)).range([m.left,W-m.right]);
+  const y=d3.scaleLinear().domain([0,80]).range([H-m.bottom,m.top]);
+  // Grid
+  svg.append('g').attr('transform',`translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(-(W-m.left-m.right)).tickFormat(''))
+    .call(g=>g.selectAll('line').attr('stroke','rgba(255,255,255,.04)').attr('stroke-dasharray','3 3'))
+    .call(g=>g.select('.domain').remove());
+  // Axes
+  svg.append('g').attr('transform',`translate(0,${H-m.bottom})`)
+    .call(d3.axisBottom(x))
+    .call(g=>g.selectAll('text').style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63'))
+    .call(g=>g.selectAll('path,line').attr('stroke','rgba(255,255,255,.06)'));
+  svg.append('g').attr('transform',`translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d=>d+'%'))
+    .call(g=>g.selectAll('text').style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63'))
+    .call(g=>g.selectAll('path,line').attr('stroke','rgba(255,255,255,.06)'));
+  // Areas
+  keys.forEach((key,ki)=>{
+    const area=d3.area().x(d=>x(d.speed)).y0(y(0)).y1(d=>y(d[key])).curve(d3.curveCatmullRom);
+    const line=d3.line().x(d=>x(d.speed)).y(d=>y(d[key])).curve(d3.curveCatmullRom);
+    svg.append('path').datum(dropoff).attr('fill',colors[ki]).attr('opacity',.12).attr('d',area);
+    const p=svg.append('path').datum(dropoff).attr('fill','none').attr('stroke',colors[ki]).attr('stroke-width',2.5).attr('d',line);
+    const len=p.node().getTotalLength();
+    p.attr('stroke-dasharray',len).attr('stroke-dashoffset',len)
+      .transition().duration(1000).delay(ki*150).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);
+    dropoff.forEach(d=>{
+      svg.append('circle').attr('cx',x(d.speed)).attr('cy',y(d[key])).attr('r',3.5).attr('fill',colors[ki]).attr('cursor','pointer')
+        .on('mousemove',e=>tip(e,`${key}: ${d[key]}% abandoned @ ${d.speed}`)).on('mouseleave',untip);
+    });
+  });
+  svg.append('text').attr('x',W/2).attr('y',H-6).attr('text-anchor','middle')
+    .style('font-family','Syne Mono,monospace').style('font-size','9px').attr('fill','#3d4f63').text('Connection speed');
+}
+
+// ARC / RADIAL CHART
+function buildArc(){
+  const wrap=document.getElementById('arcChart');
+  const size=Math.min(wrap.clientWidth||400,380);
+  const cx=size/2,cy=size/2,outer=size*.42,inner=size*.22;
+  const svg=d3.select(wrap).append('svg').attr('viewBox',`0 0 ${size} ${size}`);
+  const colors=['#e05c3a','#3ec9c9','#1a8a8a','#d4a64a'];
+  const maxV=100;
+  impact.forEach((d,i)=>{
+    const angle=(i/impact.length)*Math.PI*2-Math.PI/2;
+    const nextAngle=((i+1)/impact.length)*Math.PI*2-Math.PI/2;
+    const arc=d3.arc().innerRadius(inner).outerRadius(outer*(d.v/maxV)+inner).startAngle(angle+.04).endAngle(nextAngle-.04).cornerRadius(4);
+    const bgArc=d3.arc().innerRadius(inner).outerRadius(outer+inner).startAngle(angle+.04).endAngle(nextAngle-.04).cornerRadius(4);
+    svg.append('path').attr('d',bgArc()).attr('transform',`translate(${cx},${cy})`).attr('fill','rgba(255,255,255,.04)');
+    const path=svg.append('path').attr('transform',`translate(${cx},${cy})`).attr('fill',colors[i]).attr('cursor','pointer')
+      .on('mousemove',e=>tip(e,`${d.s}: ${d.v}/100`)).on('mouseleave',untip);
+    path.transition().duration(900).delay(i*150).ease(d3.easeCubicOut).attrTween('d',function(){
+      const interp=d3.interpolate(0,d.v/maxV);
+      return t=>{const a=d3.arc().innerRadius(inner).outerRadius(outer*interp(t)+inner).startAngle(angle+.04).endAngle(nextAngle-.04).cornerRadius(4);return a()};
+    });
+    // Label
+    const labelR=(outer*.5+inner);
+    const labelAngle=(angle+nextAngle)/2;
+    const lx=cx+Math.cos(labelAngle)*labelR;
+    const ly=cy+Math.sin(labelAngle)*labelR;
+    svg.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle').attr('dy','-.2em')
+      .style('font-family','Syne,sans-serif').style('font-size','9.5px').style('font-weight','700').attr('fill','rgba(232,236,244,.8)').text(d.s);
+    svg.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle').attr('dy','1em')
+      .style('font-family','Syne Mono,monospace').style('font-size','11px').attr('fill',colors[i]).text(d.v);
+  });
+  // Center label
+  svg.append('text').attr('x',cx).attr('y',cy).attr('text-anchor','middle').attr('dy','-.3em')
+    .style('font-family','Cormorant Garamond,serif').style('font-size','13px').attr('fill','rgba(232,236,244,.4)').text('Opportunity');
+  svg.append('text').attr('x',cx).attr('y',cy).attr('text-anchor','middle').attr('dy','1em')
+    .style('font-family','Cormorant Garamond,serif').style('font-size','13px').attr('fill','rgba(232,236,244,.4)').text('loss score');
+}
+
+// TASK ITEMS
+function buildTaskItems(){
+  const wrap=document.getElementById('taskItems');
+  taskStates[0].tasks.forEach(t=>{
+    const el=document.createElement('div');
+    el.className='task-item under';el.dataset.name=t.n;
+    el.innerHTML=`<div class="task-name">${t.n}</div><div class="task-bar-wrap"><div class="task-bar" style="width:${(t.s/310)*100}%;background:var(--teal)"></div></div><div class="task-seconds" style="color:var(--teal)">${t.s}s</div>`;
+    wrap.appendChild(el);
+  });
+}
+
+// SIGNAL BARS
+function buildSigBars(){
+  const wrap=document.getElementById('sigBars');
+  for(let i=0;i<24;i++){
+    const el=document.createElement('div');
+    el.className='sig-bar';el.dataset.i=i;
+    el.style.height='8px';
+    wrap.appendChild(el);
+  }
+}
+
+function updateTask(idx){
+  const st=taskStates[idx];
+  document.getElementById('speedNum').textContent=st.speed;
+  document.getElementById('speedNum').className='speed-num '+(['fast','fast','mid','slow'][idx]);
+  document.getElementById('sigFill').style.width=(st.signal*100)+'%';
+  document.getElementById('sigFill').style.background=st.color;
+  document.getElementById('bwStatus').textContent=st.status;
+  st.tasks.forEach(t=>{
+    const el=document.querySelector(`.task-item[data-name="${t.n}"]`);
+    if(!el)return;
+    const over=t.s>120;
+    el.className='task-item '+(over?'over':'under');
+    const bar=el.querySelector('.task-bar');
+    bar.style.width=(t.s/310*100)+'%';
+    bar.style.background=over?'var(--rust)':'var(--teal)';
+    const sec=el.querySelector('.task-seconds');
+    sec.textContent=t.s+'s';
+    sec.style.color=over?'var(--rust)':'var(--teal)';
+  });
+  // signal bars
+  const bars=document.querySelectorAll('.sig-bar');
+  bars.forEach((b,i)=>{
+    const active=i/bars.length<=st.signal;
+    const h=active?Math.max(4,Math.sin((i/bars.length)*Math.PI)*28+4):4;
+    b.style.height=h+'px';
+    b.style.background=active?st.color:'rgba(255,255,255,.06)';
+  });
+}
+
+// SCROLLAMA
+async function init(){
+  const updateMap=await buildMap();
+  buildDumbbell();
+  buildScatter();
+  buildArea();
+  buildArc();
+  buildTaskItems();
+  buildSigBars();
+
+  // Map scrollama
+  const mapScroll=scrollama();
+  mapScroll.setup({step:'#mapScrolly .map-step',offset:.55}).onStepEnter(({element})=>{
+    document.querySelectorAll('#mapScrolly .map-step').forEach(s=>s.classList.remove('is-active'));
+    element.classList.add('is-active');
+    updateMap(element.dataset.view);
+  });
+
+  // BW scrollama
+  const bwScroll=scrollama();
+  bwScroll.setup({step:'#bwScrolly .bw-step',offset:.5,progress:true})
+    .onStepEnter(({element,index})=>{
+      document.querySelectorAll('#bwScrolly .bw-step').forEach(s=>s.classList.remove('is-active'));
+      element.classList.add('is-active');
+      updateTask(index);
+    });
+
+  window.addEventListener('resize',()=>{mapScroll.resize();bwScroll.resize()});
+}
+init();
+</script>
 </body>
 </html>
